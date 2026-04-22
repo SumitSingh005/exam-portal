@@ -14,6 +14,7 @@ djangorestframework==3.16.1
 executing==2.2.1
 Flask==3.1.2
 fonttools==4.61.1
+gunicorn==25.3.0
 ipython==9.8.0
 ipython_pygments_lexers==1.1.1
 itsdangerous==2.2.0
