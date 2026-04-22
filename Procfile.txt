@@ -1,0 +1,1 @@
+web: gunicorn exam_portal.wsgi:application
