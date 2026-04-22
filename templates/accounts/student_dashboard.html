@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="dashboard-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div>
+                <div class="quick-chip mb-3"><i class="bi bi-mortarboard-fill"></i> Student Workspace</div>
+                <div class="muted-label mb-2">Student Dashboard</div>
+                <h2>Welcome back, {{ request.user.username }}</h2>
+                <p class="panel-subtitle">Track your performance, review recent results, and jump into your next exam from one place.</p>
+            </div>
+            <div class="dashboard-actions">
+                <a href="{% url 'exam_list' %}" class="btn btn-primary">Browse Exams</a>
+                <a href="{% url 'student_profile' %}" class="btn btn-outline-dark">View Profile</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card h-100">
+                <div class="stat-label">Available Exams</div>
+                <p class="stat-value">{{ total_exams }}</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card h-100">
+                <div class="stat-label">Attempted</div>
+                <p class="stat-value">{{ attempted_exams }}</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card h-100">
+                <div class="stat-label">Average Marks</div>
+                <p class="stat-value">{{ avg_score }}</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card h-100">
+                <div class="stat-label">Pending Reviews</div>
+                <p class="stat-value">{{ pending_reviews }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="summary-strip mb-4">
+        <div class="summary-pill">
+            <span class="muted-label">Average Percentage</span>
+            <strong>{{ avg_percentage }}%</strong>
+        </div>
+        <div class="summary-pill">
+            <span class="muted-label">Pass Count</span>
+            <strong>{{ pass_count }}</strong>
+        </div>
+        <div class="summary-pill">
+            <span class="muted-label">Latest Trend</span>
+            <strong>{% if improvement >= 0 %}+{% endif %}{{ improvement }}%</strong>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-xl-7">
+            <div class="card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div>
+                        <h5 class="panel-title">Available Exams</h5>
+                        <p class="panel-subtitle">See limits, attempts left, and open the instructions page.</p>
+                    </div>
+                    <a href="{% url 'exam_list' %}" class="btn btn-outline-dark btn-sm">See All</a>
+                </div>
+
+                {% if exams %}
+                <div class="activity-list">
+                    {% for exam in exams %}
+                    <div class="activity-item">
+                        <div>
+                            <div class="activity-title">{{ exam.title }}</div>
+                            <div class="activity-meta">
+                                Pass: {{ exam.pass_percentage }}% | Marking: +{{ exam.correct_marks }} / {{ exam.wrong_marks }} | Attempts:
+                                {% if exam.has_unlimited_attempts %}Unlimited{% else %}{{ exam.max_attempts }}{% endif %}
+                            </div>
+                            <div class="small mt-2">
+                                <span class="badge {% if exam.has_unlimited_attempts or exam.remaining_attempts %}bg-info text-dark{% else %}bg-danger{% endif %}">
+                                    {% if exam.has_unlimited_attempts %}
+                                    Attempts left: Unlimited
+                                    {% else %}
+                                    Attempts left: {{ exam.remaining_attempts }}/{{ exam.max_attempts }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="activity-actions">
+                            <a href="{% url 'exam_instructions' exam.id %}" class="btn btn-primary btn-sm">Instructions</a>
+                            <a href="{% url 'leaderboard' exam.id %}" class="btn btn-outline-dark btn-sm">Leaderboard</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No exams available right now.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-xl-5">
+            <div class="card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="panel-title mb-0">Performance Chart</h5>
+                        <p class="panel-subtitle">Recent percentage history.</p>
+                    </div>
+                    <span class="quick-chip">Passes: {{ pass_count }}</span>
+                </div>
+                <div class="chart-shell">
+                    <canvas id="resultChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div>
+                <h5 class="panel-title">Recent Activity</h5>
+                <p class="panel-subtitle">Your latest exam outcomes and leaderboard access.</p>
+            </div>
+        </div>
+
+        {% if results %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Exam</th>
+                        <th>Score</th>
+                        <th>Percentage</th>
+                        <th>Status</th>
+                        <th>Leaderboard</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in results %}
+                    <tr>
+                        <td>{{ r.exam.title }}</td>
+                        <td>{{ r.score }}/{{ r.max_marks }}</td>
+                        <td>{{ r.percentage }}%</td>
+                        <td>
+                            {% if r.review_pending %}
+                            <span class="badge bg-warning text-dark">Pending Review</span>
+                            {% elif r.passed %}
+                            <span class="badge bg-success">Pass</span>
+                            {% else %}
+                            <span class="badge bg-danger">Fail</span>
+                            {% endif %}
+                        </td>
+                        <td><a href="{% url 'leaderboard' r.exam.id %}" class="btn btn-outline-dark btn-sm">View</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">No results yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const isDarkTheme = document.body.classList.contains("theme-dark");
+const chartTextColor = isDarkTheme ? "#d7e0e8" : "#475467";
+const chartGridColor = isDarkTheme ? "rgba(215, 224, 232, 0.12)" : "rgba(71, 84, 103, 0.12)";
+
+let scores = [
+    {% for r in all_results %}
+        {{ r.percentage }},
+    {% endfor %}
+];
+
+let labels = [
+    {% for r in all_results %}
+        "{{ r.exam.title }}",
+    {% endfor %}
+];
+
+new Chart(document.getElementById("resultChart"), {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Percentage',
+            data: scores,
+            backgroundColor: isDarkTheme ? 'rgba(73, 178, 157, 0.72)' : 'rgba(19, 111, 99, 0.78)',
+            borderRadius: 12
+        }]
+    },
+    options: {
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                labels: {
+                    color: chartTextColor
+                }
+            }
+        },
+        scales: {
+            x: {
+                ticks: { color: chartTextColor },
+                grid: { color: chartGridColor }
+            },
+            y: {
+                ticks: { color: chartTextColor },
+                grid: { color: chartGridColor },
+                beginAtZero: true,
+                max: 100
+            }
+        }
+    }
+});
+</script>
+
+{% endblock %}

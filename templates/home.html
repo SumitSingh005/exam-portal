@@ -1,0 +1,62 @@
+{% extends 'base_home.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="hero">
+
+    <!-- PARTICLES -->
+    <div id="particles-js"></div>
+
+    <!-- BACKGROUND IMAGE -->
+    <img src="{% static 'images/homepage.png' %}" class="hero-img">
+
+    <!-- OVERLAY -->
+    <div class="overlay"></div>
+
+    <!-- TEXT -->
+    <div class="hero-text">
+
+        <h1>Welcome to {{ site_name }}</h1>
+        <p>Your smart online examination system{% if support_email %} | Support: {{ support_email }}{% endif %}</p>
+
+        <div class="mt-4">
+            <a href="{% url 'login' %}" class="btn btn-primary">
+                <i class="bi bi-box-arrow-in-right"></i> Login
+            </a>
+
+            <a href="{% url 'register_choice' %}" class="btn btn-success">
+                <i class="bi bi-pencil-square"></i> Register
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- PARTICLES SCRIPT -->
+<script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+
+<script>
+particlesJS("particles-js", {
+  particles: {
+    number: { value: 40 },
+    color: { value: "#cccccc" },
+    shape: { type: "circle" },
+    opacity: { value: 0.2 },
+    size: { value: 2 },
+    line_linked: {
+      enable: true,
+      distance: 120,
+      color: "#aaaaaa",
+      opacity: 0.2
+    },
+    move: {
+      enable: true,
+      speed: 1
+    }
+  }
+});
+</script>
+
+{% endblock %}

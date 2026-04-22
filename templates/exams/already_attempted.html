@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>You have already attempted this exam</h2>
+
+<p>Exam: {{ exam.title }}</p>
+<p>
+    Attempts Used:
+    {% if exam.has_unlimited_attempts %}
+    {{ used_attempts }} / Unlimited
+    {% else %}
+    {{ used_attempts }}/{{ max_attempts }}
+    {% endif %}
+</p>
+{% if result %}
+<p>Your Latest Score: {{ result.score }}/{{ result.max_marks }}</p>
+{% endif %}
+
+<div class="d-flex gap-2">
+    <a href="{% url 'leaderboard' exam.id %}" class="btn btn-outline-dark">View Leaderboard</a>
+    <a href="{% url 'dashboard' %}" class="btn btn-primary">Back to Dashboard</a>
+</div>
+
+{% endblock %}

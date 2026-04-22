@@ -1,0 +1,336 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="dashboard-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div>
+                <div class="quick-chip mb-3"><i class="bi bi-shield-exclamation"></i> Monitored Exam</div>
+                <h2>{{ exam.title }}</h2>
+                <p class="panel-subtitle">Question {{ q_index }} / {{ total }} | Stay on this page and remain in fullscreen mode during the attempt.</p>
+            </div>
+            <div class="dashboard-actions">
+                <span class="quick-chip text-danger">Time Left: <span id="timer"></span></span>
+                <button class="btn btn-outline-dark btn-sm" id="fullscreenBtn" type="button">Enter Fullscreen</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-xl-8">
+            <div class="card p-4 shadow">
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" id="examForm">
+        {% csrf_token %}
+        <input type="hidden" name="tab_switch_count" id="tabSwitchCount" value="{{ anti_cheating.tab_switch_count|default:0 }}">
+        <input type="hidden" name="fullscreen_exit_count" id="fullscreenExitCount" value="{{ anti_cheating.fullscreen_exit_count|default:0 }}">
+        <input type="hidden" name="copy_paste_count" id="copyPasteCount" value="{{ anti_cheating.copy_paste_count|default:0 }}">
+        <input type="hidden" name="webcam_warning_count" id="webcamWarningCount" value="{{ anti_cheating.webcam_warning_count|default:0 }}">
+        <input type="hidden" name="auto_submitted" id="autoSubmitted" value="0">
+        <input type="hidden" name="anti_cheating_notes" id="antiCheatingNotes" value="{{ anti_cheating.notes|default:'' }}">
+
+        <p><strong>{{ question.question_text }}</strong></p>
+
+        {% if question.question_type == 'written' %}
+        <textarea class="form-control" name="written_answer" id="writtenAnswerField" rows="5" placeholder="Write your answer here" required>{{ current_saved_answer }}</textarea>
+        {% else %}
+            {% for option in question_options %}
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="answer" value="{{ option.value }}" id="{{ option.id }}" {% if current_saved_answer|stringformat:"s" == option.value|stringformat:"s" %}checked{% endif %}>
+                <label class="form-check-label" for="{{ option.id }}">{{ option.label }}</label>
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <br>
+
+        {% if q_index < total %}
+        <button class="btn btn-primary" type="submit">Next</button>
+        {% else %}
+        <button class="btn btn-success" type="submit" id="finalSubmitBtn">Submit Exam</button>
+        {% endif %}
+    </form>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card p-4 shadow h-100">
+                <h5 class="panel-title">Anti-Cheating Monitor</h5>
+                <p class="panel-subtitle mb-3">Too many violations will submit the exam automatically.</p>
+
+                <div class="activity-list mb-3">
+                    <div class="activity-item">
+                        <div>
+                            <div class="activity-title">Tab Switches</div>
+                            <div class="activity-meta">Leaving the exam tab is tracked.</div>
+                        </div>
+                        <div class="activity-title" id="tabSwitchDisplay">{{ anti_cheating.tab_switch_count|default:0 }}</div>
+                    </div>
+                    <div class="activity-item">
+                        <div>
+                            <div class="activity-title">Fullscreen Exits</div>
+                            <div class="activity-meta">Exiting fullscreen counts as a violation.</div>
+                        </div>
+                        <div class="activity-title" id="fullscreenExitDisplay">{{ anti_cheating.fullscreen_exit_count|default:0 }}</div>
+                    </div>
+                    <div class="activity-item">
+                        <div>
+                            <div class="activity-title">Copy/Paste Attempts</div>
+                            <div class="activity-meta">Copy, cut, paste, and right click are blocked.</div>
+                        </div>
+                        <div class="activity-title" id="copyPasteDisplay">{{ anti_cheating.copy_paste_count|default:0 }}</div>
+                    </div>
+                    <div class="activity-item">
+                        <div>
+                            <div class="activity-title">Webcam Warnings</div>
+                            <div class="activity-meta">Missing webcam permission is recorded.</div>
+                        </div>
+                        <div class="activity-title" id="webcamWarningDisplay">{{ anti_cheating.webcam_warning_count|default:0 }}</div>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning mb-0" id="violationBanner">
+                    Keep this exam in fullscreen, stay on this tab, and avoid copy-paste actions.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-check-input:checked + .form-check-label {
+    background-color: rgba(19, 111, 99, 0.15);
+    padding: 8px 10px;
+    border-radius: 12px;
+}
+</style>
+
+<script>
+const timerKey = "timeLeft_{{ exam.id }}";
+const form = document.getElementById("examForm");
+const finalSubmitBtn = document.getElementById("finalSubmitBtn");
+const fullscreenBtn = document.getElementById("fullscreenBtn");
+const violationBanner = document.getElementById("violationBanner");
+const tabSwitchInput = document.getElementById("tabSwitchCount");
+const fullscreenExitInput = document.getElementById("fullscreenExitCount");
+const copyPasteInput = document.getElementById("copyPasteCount");
+const webcamWarningInput = document.getElementById("webcamWarningCount");
+const autoSubmittedInput = document.getElementById("autoSubmitted");
+const antiCheatingNotesInput = document.getElementById("antiCheatingNotes");
+const answerInputs = document.querySelectorAll('input[name="answer"]');
+const writtenAnswerField = document.getElementById("writtenAnswerField");
+const tabSwitchDisplay = document.getElementById("tabSwitchDisplay");
+const fullscreenExitDisplay = document.getElementById("fullscreenExitDisplay");
+const copyPasteDisplay = document.getElementById("copyPasteDisplay");
+const webcamWarningDisplay = document.getElementById("webcamWarningDisplay");
+const draftAnswerKey = "draftAnswer_{{ exam.id }}_{{ question.id }}";
+const draftAnswerType = "{{ question.question_type }}";
+let totalTime = {{ exam.duration }} * 60;
+const maxViolations = 5;
+const maxTabSwitches = 3;
+let autoSubmitted = false;
+
+if (!localStorage.getItem(timerKey)) {
+    localStorage.setItem(timerKey, totalTime);
+}
+
+let timeLeft = parseInt(localStorage.getItem(timerKey), 10);
+
+let timer = setInterval(function() {
+    let minutes = Math.floor(timeLeft / 60);
+    let seconds = timeLeft % 60;
+    seconds = seconds < 10 ? "0" + seconds : seconds;
+
+    document.getElementById("timer").innerHTML = minutes + ":" + seconds;
+
+    timeLeft--;
+    localStorage.setItem(timerKey, timeLeft);
+
+    if (timeLeft < 0) {
+        clearInterval(timer);
+        localStorage.removeItem(timerKey);
+        autoSubmitExam("Time expired. Exam submitted automatically.");
+    }
+}, 1000);
+
+function getTotalViolations() {
+    return (
+        parseInt(tabSwitchInput.value || "0", 10) +
+        parseInt(fullscreenExitInput.value || "0", 10) +
+        parseInt(copyPasteInput.value || "0", 10) +
+        parseInt(webcamWarningInput.value || "0", 10)
+    );
+}
+
+function updateViolationDisplay() {
+    tabSwitchDisplay.textContent = tabSwitchInput.value;
+    fullscreenExitDisplay.textContent = fullscreenExitInput.value;
+    copyPasteDisplay.textContent = copyPasteInput.value;
+    webcamWarningDisplay.textContent = webcamWarningInput.value;
+    violationBanner.textContent = "Total violations: " + getTotalViolations() + " / " + maxViolations;
+}
+
+function pushNote(note) {
+    const existing = antiCheatingNotesInput.value ? antiCheatingNotesInput.value.split(" | ") : [];
+    existing.push(note);
+    antiCheatingNotesInput.value = existing.slice(-6).join(" | ");
+}
+
+function registerViolation(input, displayText, note) {
+    input.value = String(parseInt(input.value || "0", 10) + 1);
+    pushNote(note);
+    updateViolationDisplay();
+    alert(displayText);
+
+    if (parseInt(tabSwitchInput.value, 10) >= maxTabSwitches || getTotalViolations() >= maxViolations) {
+        autoSubmitExam("Too many violations detected. Exam submitted automatically.");
+    }
+}
+
+function autoSubmitExam(message) {
+    if (autoSubmitted) {
+        return;
+    }
+    autoSubmitted = true;
+    autoSubmittedInput.value = "1";
+    if (message) {
+        alert(message);
+    }
+    localStorage.removeItem(timerKey);
+    form.submit();
+}
+
+function restoreDraftAnswer() {
+    const savedDraft = localStorage.getItem(draftAnswerKey);
+    if (!savedDraft) {
+        return;
+    }
+
+    if (draftAnswerType === "written" && writtenAnswerField && !writtenAnswerField.value.trim()) {
+        writtenAnswerField.value = savedDraft;
+    }
+
+    if (draftAnswerType === "mcq") {
+        answerInputs.forEach((input) => {
+            if (input.value === savedDraft) {
+                input.checked = true;
+            }
+        });
+    }
+}
+
+function persistDraftAnswer(value) {
+    if (!value || !String(value).trim()) {
+        localStorage.removeItem(draftAnswerKey);
+        return;
+    }
+    localStorage.setItem(draftAnswerKey, value);
+}
+
+document.addEventListener("visibilitychange", function() {
+    if (document.hidden) {
+        registerViolation(tabSwitchInput, "Tab switching detected!", "Tab switch detected");
+    }
+});
+
+document.addEventListener("fullscreenchange", function() {
+    if (!document.fullscreenElement) {
+        registerViolation(fullscreenExitInput, "Fullscreen exit detected!", "Fullscreen exited");
+    }
+});
+
+document.addEventListener("contextmenu", e => {
+    e.preventDefault();
+    registerViolation(copyPasteInput, "Right click is blocked during the exam!", "Context menu blocked");
+});
+
+document.addEventListener("copy", e => {
+    e.preventDefault();
+    registerViolation(copyPasteInput, "Copying is not allowed during the exam!", "Copy attempt blocked");
+});
+
+document.addEventListener("cut", e => {
+    e.preventDefault();
+    registerViolation(copyPasteInput, "Cut is not allowed during the exam!", "Cut attempt blocked");
+});
+
+document.addEventListener("paste", e => {
+    e.preventDefault();
+    registerViolation(copyPasteInput, "Pasting is not allowed during the exam!", "Paste attempt blocked");
+});
+
+form.addEventListener("submit", function(e) {
+    if (autoSubmittedInput.value === "1") {
+        localStorage.removeItem(draftAnswerKey);
+        localStorage.removeItem(timerKey);
+        return;
+    }
+
+    if (finalSubmitBtn && e.submitter === finalSubmitBtn) {
+        let confirmSubmit = confirm("Are you sure you want to submit the exam?");
+        if (!confirmSubmit) {
+            e.preventDefault();
+            return;
+        }
+    }
+
+    if (!finalSubmitBtn || e.submitter === finalSubmitBtn) {
+        localStorage.removeItem(timerKey);
+    }
+
+    localStorage.removeItem(draftAnswerKey);
+});
+
+async function requestWebcamPermission() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        registerViolation(webcamWarningInput, "Webcam access is not available on this device.", "Webcam unavailable");
+        return;
+    }
+
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        stream.getTracks().forEach(track => track.stop());
+    } catch (error) {
+        registerViolation(webcamWarningInput, "Webcam permission denied or unavailable. This has been recorded.", "Webcam permission warning");
+    }
+}
+
+window.onload = function() {
+    let elem = document.documentElement;
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+    }
+    requestWebcamPermission();
+    restoreDraftAnswer();
+    updateViolationDisplay();
+};
+
+if (fullscreenBtn) {
+    fullscreenBtn.addEventListener("click", function() {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        }
+    });
+}
+
+if (writtenAnswerField) {
+    writtenAnswerField.addEventListener("input", function() {
+        persistDraftAnswer(writtenAnswerField.value);
+    });
+}
+
+if (answerInputs.length) {
+    answerInputs.forEach((input) => {
+        input.addEventListener("change", function() {
+            persistDraftAnswer(input.value);
+        });
+    });
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <div class="card shadow p-4">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+            <div>
+                <h2 class="mb-1">{{ exam.title }}</h2>
+                <p class="text-muted mb-0">Read these instructions carefully before starting the exam.</p>
+            </div>
+            <a href="{% url 'exam_list' %}" class="btn btn-outline-dark">Back to Exams</a>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card h-100 p-3">
+                    <h6>Duration</h6>
+                    <p class="mb-0">{{ exam.duration }} minutes</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 p-3">
+                    <h6>Marking</h6>
+                    <p class="mb-0">+{{ exam.correct_marks }} for correct, {{ exam.wrong_marks }} for wrong</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 p-3">
+                    <h6>Attempts</h6>
+                    <p class="mb-0">
+                        {% if exam.has_unlimited_attempts %}
+                        Unlimited attempts
+                        {% else %}
+                        {{ remaining_attempts }} left out of {{ exam.max_attempts }}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-3 mb-4">
+            <h5 class="mb-3">Exam Rules</h5>
+            <ul class="mb-0">
+                <li>The exam can only be taken during the scheduled time window.</li>
+                <li>Once started, the timer continues until submission or timeout.</li>
+                <li>Each correct answer gives {{ exam.correct_marks }} marks.</li>
+                <li>Each wrong answer gives {{ exam.wrong_marks }} marks.</li>
+                <li>
+                    {% if exam.has_unlimited_attempts %}
+                    You can retake this exam without any attempt limit.
+                    {% else %}
+                    You can attempt this exam up to {{ exam.max_attempts }} time{{ exam.max_attempts|pluralize }}.
+                    {% endif %}
+                </li>
+                <li>Written answers may remain pending until reviewed by the teacher.</li>
+            </ul>
+        </div>
+
+        <div class="card p-3 mb-4">
+            <h5 class="mb-3">Schedule</h5>
+            <p class="mb-2"><strong>Starts:</strong> {{ exam.start_time }}</p>
+            <p class="mb-0"><strong>Ends:</strong> {{ exam.end_time }}</p>
+        </div>
+
+        {% if exam.instructions %}
+        <div class="card p-3 mb-4">
+            <h5 class="mb-3">Teacher Instructions</h5>
+            <div class="mb-0">{{ exam.instructions|linebreaks }}</div>
+        </div>
+        {% endif %}
+
+        <form method="post" class="d-flex gap-2 flex-wrap">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Start Exam</button>
+            <a href="{% url 'leaderboard' exam.id %}" class="btn btn-outline-dark">View Leaderboard</a>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

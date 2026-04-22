@@ -1,0 +1,124 @@
+{% extends "admin/base_site.html" %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .summary-card {
+        background: #ffffff;
+        border: 1px solid #d7dce3;
+        border-radius: 14px;
+        padding: 18px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .summary-label {
+        color: #52606d;
+        font-size: 13px;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .summary-value {
+        color: #111827;
+        font-size: 30px;
+        font-weight: 700;
+        line-height: 1.1;
+        margin: 0;
+    }
+
+    .summary-note {
+        color: #6b7280;
+        margin: 0 0 20px 0;
+    }
+
+    .summary-card.pending .summary-value {
+        color: #c2410c;
+    }
+
+    .quick-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 0 0 28px 0;
+    }
+
+    .quick-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 16px;
+        border-radius: 999px;
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        color: #1d4ed8;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .quick-link:hover {
+        background: #eff6ff;
+        border-color: #93c5fd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>Admin Summary</h1>
+    <p class="summary-note">Quick overview of portal activity and review workload.</p>
+
+    <div class="summary-card" style="margin-bottom: 20px;">
+        <p class="summary-label">Portal Configuration</p>
+        <p class="summary-value" style="font-size: 24px; margin-bottom: 8px;">{{ dashboard_summary.site_name }}</p>
+        <p class="summary-note" style="margin-bottom: 6px;">Support Email: {{ dashboard_summary.support_email|default:"Not set" }}</p>
+        <p class="summary-note" style="margin-bottom: 6px;">Certificate Title: {{ dashboard_summary.certificate_title }}</p>
+        <p class="summary-note" style="margin-bottom: 0;">Default Pass Percentage: {{ dashboard_summary.default_pass_percentage }}%</p>
+    </div>
+
+    <div class="summary-grid">
+        <div class="summary-card">
+            <p class="summary-label">Students</p>
+            <p class="summary-value">{{ dashboard_summary.total_students }}</p>
+        </div>
+        <div class="summary-card">
+            <p class="summary-label">Teachers</p>
+            <p class="summary-value">{{ dashboard_summary.total_teachers }}</p>
+        </div>
+        <div class="summary-card">
+            <p class="summary-label">Total Exams</p>
+            <p class="summary-value">{{ dashboard_summary.total_exams }}</p>
+        </div>
+        <div class="summary-card">
+            <p class="summary-label">Published Exams</p>
+            <p class="summary-value">{{ dashboard_summary.published_exams }}</p>
+        </div>
+        <div class="summary-card">
+            <p class="summary-label">Total Results</p>
+            <p class="summary-value">{{ dashboard_summary.total_results }}</p>
+        </div>
+        <div class="summary-card pending">
+            <p class="summary-label">Pending Reviews</p>
+            <p class="summary-value">{{ dashboard_summary.pending_reviews }}</p>
+        </div>
+    </div>
+
+    <h2>Quick Links</h2>
+    <div class="quick-links">
+        {% for item in dashboard_summary.quick_links %}
+        <a href="{{ item.url }}" class="quick-link">{{ item.label }}</a>
+        {% endfor %}
+    </div>
+
+    {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+</div>
+{% endblock %}

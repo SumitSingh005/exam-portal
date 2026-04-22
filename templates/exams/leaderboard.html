@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="dashboard-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div>
+                <div class="quick-chip mb-3"><i class="bi bi-trophy-fill"></i> Leaderboard</div>
+                <h2>{{ exam.title }}</h2>
+                <p class="panel-subtitle">See the top finalized performances for this exam. Total Attempts: {{ total_attempts }}</p>
+            </div>
+            <div class="dashboard-actions">
+                {% if current_user_rank %}
+                <span class="quick-chip">Your Rank: {{ current_user_rank }}</span>
+                {% endif %}
+                <a href="{% url 'exam_list' %}" class="btn btn-outline-dark">Back to Exams</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="summary-strip mb-4">
+        <div class="summary-pill">
+            <span class="muted-label">Total Attempts</span>
+            <strong>{{ total_attempts }}</strong>
+        </div>
+        <div class="summary-pill">
+            <span class="muted-label">Exam Title</span>
+            <strong>{{ exam.title }}</strong>
+        </div>
+    </div>
+
+    <div class="card p-4">
+        {% if leaderboard_rows %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Student</th>
+                        <th>Marks</th>
+                        <th>Percentage</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in leaderboard_rows %}
+                    <tr>
+                        <td>#{{ row.rank }}</td>
+                        <td>{{ row.student.username }}</td>
+                        <td>{{ row.score }}/{{ row.max_marks }}</td>
+                        <td>{{ row.percentage }}%</td>
+                        <td>
+                            {% if row.passed %}
+                            <span class="badge bg-success">Pass</span>
+                            {% else %}
+                            <span class="badge bg-danger">Fail</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ row.submitted_at }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">No leaderboard entries yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

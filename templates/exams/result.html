@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="dashboard-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div>
+                <div class="quick-chip mb-3"><i class="bi bi-award-fill"></i> Result Summary</div>
+                <h2>{{ exam.title }}</h2>
+                <p class="panel-subtitle">Here is your exam outcome with quick analytics and comparison data.</p>
+            </div>
+            <div class="dashboard-actions">
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-dark">Back to Dashboard</a>
+                <a href="{% url 'leaderboard' exam.id %}" class="btn btn-primary">View Leaderboard</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="summary-strip mb-4">
+        <div class="summary-pill">
+            <span class="muted-label">Score</span>
+            <strong>{{ summary.score }}/{{ summary.max_marks }}</strong>
+        </div>
+        <div class="summary-pill">
+            <span class="muted-label">Percentage</span>
+            <strong>{{ summary.percentage }}%</strong>
+        </div>
+        <div class="summary-pill">
+            <span class="muted-label">Marking</span>
+            <strong>+{{ summary.correct_marks }} / {{ summary.wrong_marks }}</strong>
+        </div>
+        <div class="summary-pill">
+            <span class="muted-label">Status</span>
+            <strong>
+                {% if summary.review_pending %}
+                <span class="badge bg-warning text-dark">Pending Review</span>
+                {% elif summary.passed %}
+                <span class="badge bg-success">Pass</span>
+                {% else %}
+                <span class="badge bg-danger">Fail</span>
+                {% endif %}
+            </strong>
+        </div>
+    </div>
+
+    {% if summary.review_pending %}
+    <div class="card p-4 mb-4">
+        <h5 class="panel-title">Manual Review Pending</h5>
+        <p class="panel-subtitle mb-0">Your written answers have been submitted successfully and will be reviewed by the teacher before final grading is complete.</p>
+    </div>
+    {% endif %}
+
+    {% if analytics %}
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card p-4 h-100">
+                <h5 class="panel-title">Class Snapshot</h5>
+                <p class="panel-subtitle mb-3">How this exam is performing overall.</p>
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div>
+                            <div class="activity-title">Average Marks</div>
+                            <div class="activity-meta">Class performance benchmark</div>
+                        </div>
+                        <div class="activity-title">{{ analytics.average_marks }}</div>
+                    </div>
+                    <div class="activity-item">
+                        <div>
+                            <div class="activity-title">Top Score</div>
+                            <div class="activity-meta">Best finalized attempt</div>
+                        </div>
+                        <div class="activity-title">{{ analytics.top_score }}</div>
+                    </div>
+                    <div class="activity-item">
+                        <div>
+                            <div class="activity-title">Topper</div>
+                            <div class="activity-meta">Highest current score</div>
+                        </div>
+                        <div class="activity-title">{% if analytics.topper %}{{ analytics.topper.student.username }}{% else %}-{% endif %}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div>
+                        <h5 class="panel-title">Question-wise Performance</h5>
+                        <p class="panel-subtitle">Accuracy trends for this exam.</p>
+                    </div>
+                </div>
+                {% if analytics.question_performance %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Question</th>
+                                <th>Attempts</th>
+                                <th>Correct</th>
+                                <th>Accuracy</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in analytics.question_performance %}
+                            <tr>
+                                <td>{{ item.question_text }}</td>
+                                <td>{{ item.attempts }}</td>
+                                <td>{{ item.correct_count }}</td>
+                                <td>{{ item.accuracy }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No question-wise data available yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

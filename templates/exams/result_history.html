@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="dashboard-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div>
+                <div class="quick-chip mb-3"><i class="bi bi-clock-history"></i> Result History</div>
+                <h2>Your Exam Results</h2>
+                <p class="panel-subtitle">Review your completed exams and keep track of pending reviews.</p>
+            </div>
+            <div class="dashboard-actions">
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-dark">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4">
+        {% if results %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Exam</th>
+                        <th>Score</th>
+                        <th>Percentage</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr>
+                        <td>{{ result.exam.title }}</td>
+                        <td>{{ result.score }}/{{ result.max_marks }}</td>
+                        <td>{{ result.percentage }}%</td>
+                        <td>
+                            {% if result.review_pending %}
+                            <span class="badge bg-warning text-dark">Pending Review</span>
+                            {% elif result.passed %}
+                            <span class="badge bg-success">Pass</span>
+                            {% else %}
+                            <span class="badge bg-danger">Fail</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ result.submitted_at }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">No results available yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="dashboard-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div>
+                <div class="quick-chip mb-3"><i class="bi bi-clipboard-data-fill"></i> Teacher Report</div>
+                <h2>{{ exam.title }} Report</h2>
+                <p class="panel-subtitle">Review attempts, export results, and identify weak questions from one place.</p>
+            </div>
+            <div class="dashboard-actions">
+                <a href="{% url 'export_results' exam.id 'csv' %}" class="btn btn-outline-success">Export CSV</a>
+                <a href="{% url 'export_results' exam.id 'excel' %}" class="btn btn-outline-dark">Export Excel</a>
+                <a href="{% url 'teacher_exam_list' %}" class="btn btn-primary">Back to My Exams</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card h-100">
+                <div class="stat-label">Students Attempted</div>
+                <p class="stat-value">{{ student_count }}</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card h-100">
+                <div class="stat-label">Highest Score</div>
+                <p class="stat-value">{{ highest_score }}</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card h-100">
+                <div class="stat-label">Lowest Score</div>
+                <p class="stat-value">{{ lowest_score }}</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card h-100">
+                <div class="stat-label">Written Questions</div>
+                <p class="stat-value">{{ written_questions_count }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="summary-strip mb-4">
+        <div class="summary-pill">
+            <span class="muted-label">Average Marks</span>
+            <strong>{{ average_marks }}</strong>
+        </div>
+        <div class="summary-pill">
+            <span class="muted-label">Average Percentage</span>
+            <strong>{{ average_percentage }}%</strong>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-xl-8">
+            <div class="card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div>
+                        <h5 class="panel-title">Who Attempted The Exam</h5>
+                        <p class="panel-subtitle">Track scores, statuses, and pending review actions.</p>
+                    </div>
+                </div>
+
+                {% if results %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Marks</th>
+                                <th>Percentage</th>
+                                <th>Status</th>
+                                <th>Violations</th>
+                                <th>Submitted</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in results %}
+                            <tr>
+                                <td>{{ result.student.username }}</td>
+                                <td>{{ result.score }}/{{ result.max_marks }}</td>
+                                <td>{{ result.percentage }}%</td>
+                                <td>
+                                    {% if result.review_pending %}
+                                    <span class="badge bg-warning text-dark">Pending Review</span>
+                                    {% elif result.passed %}
+                                    <span class="badge bg-success">Pass</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Fail</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="activity-meta">
+                                        Total: {{ result.violation_count }}{% if result.auto_submitted %} | Auto{% endif %}
+                                    </div>
+                                    <div class="small text-muted">
+                                        Tab: {{ result.tab_switch_count }},
+                                        Fullscreen: {{ result.fullscreen_exit_count }},
+                                        Copy: {{ result.copy_paste_count }},
+                                        Webcam: {{ result.webcam_warning_count }}
+                                    </div>
+                                </td>
+                                <td>{{ result.submitted_at }}</td>
+                                <td>
+                                    {% if result.review_pending %}
+                                    <a href="{% url 'review_result' result.id %}" class="btn btn-outline-primary btn-sm">Review</a>
+                                    {% else %}
+                                    <span class="text-muted">Reviewed</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No students have attempted this exam yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card p-4 h-100">
+                <h5 class="panel-title">Weak Questions</h5>
+                <p class="panel-subtitle mb-3">Questions with lower accuracy across attempts.</p>
+                {% if weak_questions %}
+                <div class="activity-list">
+                    {% for item in weak_questions %}
+                    <div class="activity-item">
+                        <div>
+                            <div class="activity-title">{{ item.question_text }}</div>
+                            <div class="activity-meta">Attempts: {{ item.attempts }} | Correct: {{ item.correct_count }}</div>
+                        </div>
+                        <div class="activity-title">{{ item.accuracy }}%</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No weak-question data available yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

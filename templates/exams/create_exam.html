@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="dashboard-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div>
+                <div class="quick-chip mb-3"><i class="bi bi-plus-square-fill"></i> Exam Builder</div>
+                <h2>Create Exam</h2>
+                <p class="panel-subtitle">Set the schedule, marking rules, retake policy, and instructions before adding questions.</p>
+            </div>
+            <div class="dashboard-actions">
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-dark">Cancel</a>
+            </div>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} app-card border-0 mb-3">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card p-4">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-section">
+                <div class="form-section-title">Exam Basics</div>
+                <div class="form-section-subtitle">Define the title, duration, and overall pass threshold.</div>
+                <div class="row g-3">
+                    <div class="col-lg-8">
+                        <label class="form-label">Exam Title</label>
+                        <input type="text" name="title" class="form-control" placeholder="Enter exam name" required>
+                    </div>
+                    <div class="col-lg-4">
+                        <label class="form-label">Duration (minutes)</label>
+                        <input type="number" name="duration" class="form-control" placeholder="e.g. 60" required>
+                    </div>
+                    <div class="col-lg-4">
+                        <label class="form-label">Pass Percentage</label>
+                        <input type="number" name="pass_percentage" class="form-control" value="{{ portal_settings.default_pass_percentage }}" min="0" max="100" step="0.01">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-section-title">Marking Rules</div>
+                <div class="form-section-subtitle">Choose how correct and wrong answers affect the final score.</div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Marks For Correct Answer</label>
+                        <input type="number" name="correct_marks" class="form-control" value="4" step="0.01" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Marks For Wrong Answer</label>
+                        <input type="number" name="wrong_marks" class="form-control" value="-1" step="0.01" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-section-title">Attempts And Schedule</div>
+                <div class="form-section-subtitle">Control how often students can try and when the exam is live.</div>
+                <div class="row g-3">
+                    <div class="col-lg-4">
+                        <label class="form-label">Attempts Allowed</label>
+                        <select name="max_attempts" class="form-select" required>
+                            <option value="1" selected>Only 1 attempt</option>
+                            <option value="3">Maximum 3 attempts</option>
+                            <option value="0">Unlimited attempts</option>
+                        </select>
+                        <div class="form-text">Choose 0 for unlimited retakes.</div>
+                    </div>
+                    <div class="col-lg-4">
+                        <label class="form-label">Start Time</label>
+                        <input type="datetime-local" name="start_time" class="form-control" required>
+                    </div>
+                    <div class="col-lg-4">
+                        <label class="form-label">End Time</label>
+                        <input type="datetime-local" name="end_time" class="form-control" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-section-title">Instructions</div>
+                <div class="form-section-subtitle">Add rules or reminders that students should read before they begin.</div>
+                <label class="form-label">Exam Instructions</label>
+                <textarea name="instructions" class="form-control" rows="5" placeholder="Enter exam rules, allowed behavior, or any important notes for students."></textarea>
+            </div>
+
+            <div class="d-flex gap-2 mt-4 flex-wrap">
+                <button type="submit" class="btn btn-primary">Create Exam</button>
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-dark">Back</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

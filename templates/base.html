@@ -1,0 +1,101 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ site_name }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark px-3 py-3">
+    <button class="btn btn-light" id="toggleBtn">Menu</button>
+    <div class="navbar-actions ms-auto">
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">
+            <i class="bi bi-moon-stars-fill"></i>
+            <span>Theme</span>
+        </button>
+        <span class="text-white fw-bold">{{ site_name }}</span>
+    </div>
+</nav>
+
+<div class="layout-shell">
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <h4>{{ site_name }}</h4>
+            <div class="sidebar-note">Exam workspace</div>
+        </div>
+
+        <a href="{% url 'dashboard' %}" class="nav-link"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+        <a href="{% url 'exam_list' %}" class="nav-link"><i class="bi bi-journal-check"></i> Exams</a>
+
+        {% if user.is_student %}
+        <a href="{% url 'student_profile' %}" class="nav-link"><i class="bi bi-person-badge"></i> Profile</a>
+        {% endif %}
+
+        {% if user.is_teacher %}
+        <a href="{% url 'create_exam' %}" class="nav-link"><i class="bi bi-plus-square"></i> Create Exam</a>
+        <a href="{% url 'add_question' %}" class="nav-link"><i class="bi bi-patch-plus"></i> Add Question</a>
+        <a href="{% url 'teacher_exam_list' %}" class="nav-link"><i class="bi bi-kanban"></i> My Exams</a>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+        <a href="{% url 'logout' %}" class="nav-link text-danger mt-3">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+        {% endif %}
+
+        {% if support_email %}
+        <div class="small text-white-50 mt-4">
+            Support: {{ support_email }}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="content p-4 w-100">
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const toggleBtn = document.getElementById("toggleBtn");
+    const sidebar = document.querySelector(".sidebar");
+    const themeToggle = document.getElementById("themeToggle");
+    const body = document.body;
+    const savedTheme = localStorage.getItem("portal-theme");
+
+    function applyTheme(theme) {
+        const isDark = theme === "dark";
+        body.classList.toggle("theme-dark", isDark);
+        if (themeToggle) {
+            themeToggle.innerHTML = isDark
+                ? '<i class="bi bi-sun-fill"></i><span>Light</span>'
+                : '<i class="bi bi-moon-stars-fill"></i><span>Dark</span>';
+        }
+    }
+
+    applyTheme(savedTheme || "light");
+
+    if (toggleBtn && sidebar) {
+        toggleBtn.addEventListener("click", function() {
+            sidebar.classList.toggle("d-none");
+        });
+    }
+
+    if (themeToggle) {
+        themeToggle.addEventListener("click", function() {
+            const nextTheme = body.classList.contains("theme-dark") ? "light" : "dark";
+            localStorage.setItem("portal-theme", nextTheme);
+            applyTheme(nextTheme);
+        });
+    }
+});
+</script>
+
+</body>
+</html>

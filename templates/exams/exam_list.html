@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="dashboard-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div>
+                <div class="quick-chip mb-3"><i class="bi bi-journal-bookmark-fill"></i> Exam Center</div>
+                <h2>Available Exams</h2>
+                <p class="panel-subtitle">Review schedules, attempt limits, and jump into instructions when an exam is active.</p>
+            </div>
+            <div class="dashboard-actions">
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-dark">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} app-card border-0 mb-3">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row g-4">
+        {% for exam in exams %}
+        <div class="col-md-6 col-xl-4">
+            <div class="card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                    <div>
+                        <h5 class="panel-title mb-1">{{ exam.title }}</h5>
+                        <p class="panel-subtitle mb-0">
+                            {% if exam.is_active %}
+                            Live now
+                            {% elif exam.has_ended %}
+                            Finished
+                            {% else %}
+                            Scheduled
+                            {% endif %}
+                        </p>
+                    </div>
+                    <span class="quick-chip">{{ exam.duration }} mins</span>
+                </div>
+
+                <div class="summary-strip mb-3">
+                    <div class="summary-pill">
+                        <span class="muted-label">Start</span>
+                        <strong>{{ exam.start_time|date:"M d, Y H:i"|default:"Not scheduled" }}</strong>
+                    </div>
+                    <div class="summary-pill">
+                        <span class="muted-label">End</span>
+                        <strong>{{ exam.end_time|date:"M d, Y H:i"|default:"Not scheduled" }}</strong>
+                    </div>
+                </div>
+
+                <div class="activity-list mb-3">
+                    <div class="activity-item">
+                        <div>
+                            <div class="activity-title">Marking Scheme</div>
+                            <div class="activity-meta">Correct: +{{ exam.correct_marks }} | Wrong: {{ exam.wrong_marks }}</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div>
+                            <div class="activity-title">Attempts Allowed</div>
+                            <div class="activity-meta">{% if exam.has_unlimited_attempts %}Unlimited{% else %}{{ exam.max_attempts }}{% endif %}</div>
+                        </div>
+                        {% if user.is_student %}
+                        <div>
+                            <span class="badge {% if exam.has_unlimited_attempts or exam.remaining_attempts %}bg-info text-dark{% else %}bg-danger{% endif %}">
+                                {% if exam.has_unlimited_attempts %}
+                                Attempts left: Unlimited
+                                {% else %}
+                                {{ exam.remaining_attempts }}/{{ exam.max_attempts }} left
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="activity-actions mt-auto">
+                    {% if exam.is_active %}
+                        <a href="{% url 'exam_instructions' exam.id %}" class="btn btn-primary btn-sm">View Instructions</a>
+                    {% elif exam.has_ended %}
+                        <button class="btn btn-secondary btn-sm" disabled>Closed</button>
+                    {% else %}
+                        <button class="btn btn-warning btn-sm" disabled>Not Started</button>
+                    {% endif %}
+
+                    <a href="{% url 'leaderboard' exam.id %}" class="btn btn-outline-dark btn-sm">Leaderboard</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card p-4">
+                <p class="text-muted mb-0">No exams available right now.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

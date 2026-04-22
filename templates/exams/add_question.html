@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="dashboard-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div>
+                <div class="quick-chip mb-3"><i class="bi bi-patch-plus-fill"></i> Question Builder</div>
+                <h2>Add Questions</h2>
+                <p class="panel-subtitle">Choose an exam, add MCQ or written questions, and keep track of your latest additions.</p>
+            </div>
+            <div class="dashboard-actions">
+                <a href="{% url 'teacher_exam_list' %}" class="btn btn-outline-dark">My Exams</a>
+            </div>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} app-card border-0 mb-3">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row g-4">
+        <div class="col-xl-7">
+            <div class="card p-4 h-100">
+                {% if not selected_exam %}
+                <div class="form-section mb-0">
+                    <div class="form-section-title">Select Exam</div>
+                    <div class="form-section-subtitle">Pick the exam where you want to add questions.</div>
+                    <form method="post">
+                        {% csrf_token %}
+                        <label class="form-label">Available Exams</label>
+                        <select name="exam" class="form-select mb-3">
+                            {% for exam in exams %}
+                                <option value="{{ exam.id }}">{{ exam.title }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" name="select_exam" class="btn btn-primary">Continue</button>
+                    </form>
+                </div>
+                {% endif %}
+
+                {% if selected_exam %}
+                <div class="form-section mb-0">
+                    <div class="form-section-title">Create Question</div>
+                    <div class="form-section-subtitle">Add MCQ choices or define the expected written answer for review.</div>
+
+                    <form method="post" id="questionForm">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label class="form-label">Question Type</label>
+                            <select name="question_type" id="questionType" class="form-select">
+                                <option value="mcq">MCQ Question</option>
+                                <option value="written">Written Question</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Question</label>
+                            <textarea name="question" class="form-control" placeholder="Enter question" required></textarea>
+                        </div>
+
+                        <div id="mcqFields">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Option 1</label>
+                                    <input type="text" name="option1" placeholder="Option 1" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Option 2</label>
+                                    <input type="text" name="option2" placeholder="Option 2" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Option 3</label>
+                                    <input type="text" name="option3" placeholder="Option 3" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Option 4</label>
+                                    <input type="text" name="option4" placeholder="Option 4" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                <label class="form-label">Correct Option</label>
+                                <select name="correct" class="form-select">
+                                    <option value="1">Correct: Option 1</option>
+                                    <option value="2">Correct: Option 2</option>
+                                    <option value="3">Correct: Option 3</option>
+                                    <option value="4">Correct: Option 4</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="writtenFields" class="d-none mt-3">
+                            <label class="form-label">Expected Written Answer</label>
+                            <textarea name="written_answer" class="form-control" placeholder="Expected written answer"></textarea>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4 flex-wrap">
+                            <button type="submit" name="action" value="add" class="btn btn-success">Add Question</button>
+                            <button type="submit" name="action" value="finish" class="btn btn-primary">Finish</button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-xl-5">
+            <div class="card p-4 h-100">
+                <h5 class="panel-title">Recent Questions</h5>
+                <p class="panel-subtitle mb-3">Keep an eye on what you just added.</p>
+                {% if selected_exam %}
+                <div class="activity-list">
+                    {% for q in questions|slice:":5" %}
+                    <div class="activity-item">
+                        <div>
+                            <div class="activity-title">{{ q.question_text }}</div>
+                            <div class="activity-meta">{{ q.get_question_type_display }}</div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted mb-0">No questions added yet.</p>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">Select an exam first to start building your question set.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const form = document.getElementById("questionForm");
+    const questionType = document.getElementById("questionType");
+    const mcqFields = document.getElementById("mcqFields");
+    const writtenFields = document.getElementById("writtenFields");
+
+    function toggleQuestionFields() {
+        if (!questionType) {
+            return;
+        }
+
+        const isWritten = questionType.value === "written";
+        mcqFields.classList.toggle("d-none", isWritten);
+        writtenFields.classList.toggle("d-none", !isWritten);
+    }
+
+    if (form) {
+        form.addEventListener("submit", function() {
+            setTimeout(() => {
+                form.reset();
+                toggleQuestionFields();
+            }, 100);
+        });
+    }
+
+    if (questionType) {
+        questionType.addEventListener("change", toggleQuestionFields);
+        toggleQuestionFields();
+    }
+});
+</script>
+
+{% endblock %}

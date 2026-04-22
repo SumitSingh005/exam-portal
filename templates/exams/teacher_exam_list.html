@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <h2>My Exams</h2>
+
+    <table class="table table-striped mt-3">
+        <tr>
+            <th>Title</th>
+            <th>Duration</th>
+            <th>Actions</th>
+        </tr>
+
+        {% for exam in exams %}
+        <tr>
+            <td>{{ exam.title }}</td>
+            <td>{{ exam.duration }} min</td>
+            <td>
+                <a href="{% url 'edit_exam' exam.id %}" class="btn btn-warning btn-sm">Edit</a>
+                <form method="post" action="{% url 'delete_exam' exam.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+                <a href="{% url 'manage_questions' exam.id %}" class="btn btn-secondary btn-sm">Questions</a>
+                <a href="{% url 'teacher_exam_report' exam.id %}" class="btn btn-info btn-sm">Report</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3" class="text-muted">No exams created yet.</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% endblock %}

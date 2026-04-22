@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="dashboard-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div>
+                <div class="quick-chip mb-3"><i class="bi bi-person-workspace"></i> Teacher Workspace</div>
+                <h2>Teaching Dashboard</h2>
+                <p class="panel-subtitle">Monitor activity, review pending answers, and manage upcoming exams from a cleaner control panel.</p>
+            </div>
+            <div class="dashboard-actions">
+                <a href="{% url 'create_exam' %}" class="btn btn-primary">Create Exam</a>
+                <a href="{% url 'teacher_exam_list' %}" class="btn btn-outline-dark">Manage Exams</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card h-100">
+                <div class="stat-label">Total Exams</div>
+                <p class="stat-value">{{ total_exams }}</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card h-100">
+                <div class="stat-label">Questions Bank</div>
+                <p class="stat-value">{{ total_questions }}</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card h-100">
+                <div class="stat-label">Students Attempted</div>
+                <p class="stat-value">{{ students_attempted }}</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card h-100">
+                <div class="stat-label">Pending Reviews</div>
+                <p class="stat-value">{{ pending_reviews }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="summary-strip mb-4">
+        <div class="summary-pill">
+            <span class="muted-label">Average Marks</span>
+            <strong>{{ average_marks }}</strong>
+        </div>
+        <div class="summary-pill">
+            <span class="muted-label">Average Percentage</span>
+            <strong>{{ average_percentage }}%</strong>
+        </div>
+        <div class="summary-pill">
+            <span class="muted-label">Top Performer</span>
+            <strong>{% if topper %}{{ topper.student.username }}{% else %}-{% endif %}</strong>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-xl-4">
+            <div class="card p-4 h-100">
+                <h5 class="panel-title">Top Performer</h5>
+                <p class="panel-subtitle mb-3">Best finalized result across your exams.</p>
+                {% if topper %}
+                <div class="activity-item">
+                    <div>
+                        <div class="activity-title">{{ topper.student.username }}</div>
+                        <div class="activity-meta">{{ topper.exam.title }}</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="activity-title">{{ topper.score }}/{{ topper.max_marks }}</div>
+                        <div class="activity-meta">{{ topper.percentage }}%</div>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No attempts yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-xl-8">
+            <div class="card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div>
+                        <h5 class="panel-title mb-0">Exam Activity Overview</h5>
+                        <p class="panel-subtitle">Attempts and pending reviews across your latest exams.</p>
+                    </div>
+                </div>
+                <div class="chart-shell">
+                    <canvas id="teacherAnalyticsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-xl-4">
+            <div class="card p-4 h-100">
+                <h5 class="panel-title">Quick Actions</h5>
+                <p class="panel-subtitle mb-3">Jump into your most common tasks.</p>
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div>
+                            <div class="activity-title">Create a new exam</div>
+                            <div class="activity-meta">Set schedule, rules, and attempts.</div>
+                        </div>
+                        <div class="activity-actions">
+                            <a href="{% url 'create_exam' %}" class="btn btn-primary btn-sm">Create</a>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div>
+                            <div class="activity-title">Add questions</div>
+                            <div class="activity-meta">Build MCQ and written exams faster.</div>
+                        </div>
+                        <div class="activity-actions">
+                            <a href="{% url 'add_question' %}" class="btn btn-outline-dark btn-sm">Add</a>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div>
+                            <div class="activity-title">Review exam reports</div>
+                            <div class="activity-meta">Export results and review submissions.</div>
+                        </div>
+                        <div class="activity-actions">
+                            <a href="{% url 'teacher_exam_list' %}" class="btn btn-outline-dark btn-sm">Open</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-8">
+            <div class="card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div>
+                        <h5 class="panel-title">Recent Exam Analytics</h5>
+                        <p class="panel-subtitle">See how your latest exams are performing.</p>
+                    </div>
+                </div>
+
+                {% for item in exam_analytics %}
+                <div class="activity-item mb-3">
+                    <div>
+                        <div class="activity-title">{{ item.exam.title }}</div>
+                        <div class="activity-meta">
+                            Marking: +{{ item.exam.correct_marks }} / {{ item.exam.wrong_marks }} |
+                            Avg: {{ item.average_percentage }}% |
+                            Top Score: {{ item.top_score }}
+                        </div>
+                    </div>
+                    <div class="activity-actions">
+                        <span class="quick-chip">Attempts: {{ item.attempts }}</span>
+                        <span class="quick-chip">Pending: {{ item.pending_reviews }}</span>
+                        <span class="quick-chip">Passes: {{ item.pass_count }}</span>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted mb-0">No exam analytics available yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const teacherDarkTheme = document.body.classList.contains("theme-dark");
+const teacherTextColor = teacherDarkTheme ? "#d7e0e8" : "#475467";
+const teacherGridColor = teacherDarkTheme ? "rgba(215, 224, 232, 0.12)" : "rgba(71, 84, 103, 0.12)";
+
+const teacherLabels = [
+    {% for item in exam_analytics %}
+        "{{ item.exam.title }}",
+    {% endfor %}
+];
+
+const teacherAttempts = [
+    {% for item in exam_analytics %}
+        {{ item.attempts }},
+    {% endfor %}
+];
+
+const teacherPending = [
+    {% for item in exam_analytics %}
+        {{ item.pending_reviews }},
+    {% endfor %}
+];
+
+new Chart(document.getElementById("teacherAnalyticsChart"), {
+    type: 'bar',
+    data: {
+        labels: teacherLabels,
+        datasets: [
+            {
+                label: 'Attempts',
+                data: teacherAttempts,
+                backgroundColor: teacherDarkTheme ? 'rgba(73, 178, 157, 0.72)' : 'rgba(19, 111, 99, 0.78)',
+                borderRadius: 12
+            },
+            {
+                label: 'Pending Reviews',
+                data: teacherPending,
+                backgroundColor: teacherDarkTheme ? 'rgba(242, 156, 100, 0.72)' : 'rgba(194, 109, 58, 0.78)',
+                borderRadius: 12
+            }
+        ]
+    },
+    options: {
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                labels: {
+                    color: teacherTextColor
+                }
+            }
+        },
+        scales: {
+            x: {
+                ticks: { color: teacherTextColor },
+                grid: { color: teacherGridColor }
+            },
+            y: {
+                beginAtZero: true,
+                ticks: { color: teacherTextColor },
+                grid: { color: teacherGridColor }
+            }
+        }
+    }
+});
+</script>
+
+{% endblock %}

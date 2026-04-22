@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="dashboard-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div>
+                <div class="quick-chip mb-3"><i class="bi bi-journal-text"></i> Manual Review</div>
+                <h2>Review Written Answers</h2>
+                <p class="panel-subtitle">{{ result.student.username }} • {{ result.exam.title }}</p>
+            </div>
+            <div class="dashboard-actions">
+                <a href="{% url 'teacher_exam_report' result.exam.id %}" class="btn btn-outline-dark">Back to Report</a>
+            </div>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="activity-list">
+            {% for answer in written_answers %}
+            <div class="card p-4">
+                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                    <div>
+                        <div class="quick-chip mb-2">Question {{ forloop.counter }}</div>
+                        <h5 class="panel-title mb-1">{{ answer.question.question_text }}</h5>
+                    </div>
+                    <span class="quick-chip">Max Marks: {{ result.exam.correct_marks }}</span>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <div class="form-section h-100 mb-0">
+                            <div class="form-section-title">Student Answer</div>
+                            <div class="form-section-subtitle">Submitted response for manual evaluation.</div>
+                            <div>{{ answer.written_answer|linebreaks }}</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-section h-100 mb-0">
+                            <div class="form-section-title">Reference Answer</div>
+                            <div class="form-section-subtitle">Teacher-provided guide answer.</div>
+                            <div>{{ answer.question.written_answer|default:"Not provided"|linebreaks }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mt-2">
+                    <div class="col-md-4">
+                        <label class="form-label">Marks Awarded</label>
+                        <input
+                            type="number"
+                            step="0.5"
+                            min="0"
+                            max="{{ result.exam.correct_marks }}"
+                            name="marks_{{ answer.id }}"
+                            value="{{ answer.awarded_marks }}"
+                            class="form-control"
+                            required
+                        >
+                        <div class="form-text">Maximum marks: {{ result.exam.correct_marks }}</div>
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label">Feedback</label>
+                        <textarea
+                            name="feedback_{{ answer.id }}"
+                            class="form-control"
+                            rows="4"
+                        >{{ answer.feedback }}</textarea>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="d-flex gap-2 mt-4 flex-wrap">
+            <button type="submit" class="btn btn-primary">Save Review</button>
+            <a href="{% url 'teacher_exam_report' result.exam.id %}" class="btn btn-outline-dark">Cancel</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
