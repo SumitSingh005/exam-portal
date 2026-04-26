@@ -6,10 +6,49 @@ from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
 from django.db.models import Avg, Count, Max, Q
 from django.shortcuts import redirect, render
+from django.utils import timezone
 
 from exams.models import Exam, Question, Result, ResultAnswer
 
 User = get_user_model()
+
+
+# ========================
+# SECURITY SETTINGS
+# ========================
+MAX_LOGIN_ATTEMPTS = 5
+LOCKOUT_DURATION_MINUTES = 15
+
+
+def log_security_event(event_type, user=None, ip_address=None, details=""):
+    """
+    Log security-related events for audit purposes.
+    """
+    from datetime import datetime
+    import os
+    
+    log_dir = BASE_DIR = "C:/Users/sr538/OneDrive/Desktop/e-ExamPortal/exam_portal"
+    log_file = os.path.join(log_dir, "security.log")
+    
+    timestamp = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
+    username = user.username if user else "Anonymous"
+    ip = ip_address or "Unknown"
+    
+    log_entry = f"[{timestamp}] {event_type} | User: {username} | IP: {ip} | {details}\n"
+    
+    try:
+        with open(log_file, "a") as f:
+            f.write(log_entry)
+    except Exception:
+        pass  # Don't break app if logging fails
+
+
+def get_client_ip(request):
+    """Extract client IP from request."""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        return x_forwarded_for.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR', 'unknown')
 
 
 def send_notification_email(subject, message, recipients):
@@ -208,10 +247,47 @@ def user_login(request):
     if request.method == 'POST':
         username = (request.POST.get('username') or '').strip()
         password = request.POST.get('password') or ''
-
+        
+        # Get client IP
+        client_ip = get_client_ip(request)
+        
+        # Try to get user for lockout check
+        try:
+            user_obj = User.objects.get(username__iexact=username)
+        except User.DoesNotExist:
+            user_obj = None
+        
+        # Check if account is locked
+        if user_obj and user_obj.locked_until:
+            if timezone.now() < user_obj.locked_until:
+                remaining_time = (user_obj.locked_until - timezone.now()).seconds // 60
+                messages.error(request, f"Account locked. Try again in {remaining_time} minutes.")
+                log_security_event("LOGIN_BLOCKED_LOCKED", user_obj, client_ip, "Locked account login attempt")
+                return render(request, 'accounts/login.html')
+            else:
+                # Lockout expired, reset attempts
+                user_obj.failed_login_attempts = 0
+                user_obj.locked_until = None
+                user_obj.save()
+        
+        # Check if account is manually deactivated
+        if user_obj and not user_obj.is_active_manual:
+            messages.error(request, "Account has been deactivated. Contact support.")
+            log_security_event("LOGIN_BLOCKED_INACTIVE", user_obj, client_ip, "Inactive account login attempt")
+            return render(request, 'accounts/login.html')
+        
+        # Attempt authentication
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
+            # Reset failed attempts on successful login
+            if user_obj:
+                user_obj.failed_login_attempts = 0
+                user_obj.last_failed_login = None
+                user_obj.locked_until = None
+                user_obj.save()
+            
+            log_security_event("LOGIN_SUCCESS", user, client_ip, "Successful login")
             login(request, user)
 
             if user.is_superuser:
@@ -221,7 +297,26 @@ def user_login(request):
             if user.is_student:
                 return redirect('student_dashboard')
         else:
-            messages.error(request, "Invalid username or password")
+            # Failed login attempt
+            if user_obj:
+                user_obj.failed_login_attempts += 1
+                user_obj.last_failed_login = timezone.now()
+                
+                if user_obj.failed_login_attempts >= MAX_LOGIN_ATTEMPTS:
+                    # Lock the account
+                    from datetime import timedelta
+                    user_obj.locked_until = timezone.now() + timedelta(minutes=LOCKOUT_DURATION_MINUTES)
+                    user_obj.save()
+                    messages.error(request, f"Too many failed attempts. Account locked for {LOCKOUT_DURATION_MINUTES} minutes.")
+                    log_security_event("LOGIN_BLOCKED_MAX_ATTEMPTS", user_obj, client_ip, f"Attempts: {user_obj.failed_login_attempts}")
+                else:
+                    user_obj.save()
+                    remaining = MAX_LOGIN_ATTEMPTS - user_obj.failed_login_attempts
+                    messages.error(request, f"Invalid username or password. {remaining} attempts remaining.")
+                    log_security_event("LOGIN_FAILED", user_obj, client_ip, f"Attempts: {user_obj.failed_login_attempts}")
+            else:
+                messages.error(request, "Invalid username or password")
+                log_security_event("LOGIN_FAILED_UNKNOWN", None, client_ip, f"Unknown user: {username}")
 
     return render(request, 'accounts/login.html')
 
