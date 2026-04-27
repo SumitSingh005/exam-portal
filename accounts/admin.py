@@ -8,6 +8,7 @@ from .models import User
 class UserAdmin(DjangoUserAdmin):
     list_display = (
         'username',
+        'student_id',
         'email',
         'first_name',
         'last_name',
@@ -17,14 +18,14 @@ class UserAdmin(DjangoUserAdmin):
         'date_joined',
     )
     list_filter = ('is_student', 'is_teacher', 'is_staff', 'is_superuser', 'is_active')
-    search_fields = ('username', 'email', 'first_name', 'last_name')
+    search_fields = ('username', 'student_id', 'email', 'first_name', 'last_name')
     ordering = ('username',)
 
     fieldsets = DjangoUserAdmin.fieldsets + (
-        ('Portal Roles', {'fields': ('is_student', 'is_teacher')}),
+        ('Portal Roles', {'fields': ('is_student', 'is_teacher', 'student_id')}),
     )
     add_fieldsets = DjangoUserAdmin.add_fieldsets + (
-        ('Portal Roles', {'fields': ('is_student', 'is_teacher')}),
+        ('Portal Roles', {'fields': ('is_student', 'is_teacher', 'student_id')}),
     )
 
     @admin.display(description='Role')

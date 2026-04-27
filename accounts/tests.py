@@ -13,6 +13,7 @@ class StudentDashboardTests(TestCase):
     def setUp(self):
         self.student = User.objects.create_user(
             username='student1',
+            student_id='STU1001',
             email='student@example.com',
             password='testpass123',
         )
@@ -50,6 +51,20 @@ class StudentDashboardTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Student Profile')
+        self.assertContains(response, 'STU1001')
+
+    def test_student_can_login_with_student_id(self):
+        response = self.client.post(
+            reverse('login'),
+            {
+                'username': 'stu1001',
+                'password': 'testpass123',
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Student Dashboard')
 
     @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
     def test_password_reset_flow_sends_email(self):
@@ -81,6 +96,7 @@ class StudentDashboardTests(TestCase):
             reverse('student_signup'),
             {
                 'username': 'student2',
+                'student_id': 'STU1002',
                 'email': 'student@example.com',
                 'password1': 'testpass123',
                 'password2': 'testpass123',

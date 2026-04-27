@@ -162,45 +162,76 @@ def home(request):
     return render(request, 'home.html')
 
 
-def validate_signup_data(username, email, password1, password2):
+def normalize_student_id(value):
+    return (value or '').strip().upper()
+
+
+def validate_signup_data(username, email, password1, password2, student_id=None, require_student_id=False):
     username = (username or '').strip()
     email = (email or '').strip().lower()
+    student_id = normalize_student_id(student_id)
     password1 = password1 or ''
     password2 = password2 or ''
 
     if not username or not email:
-        return username, email, "Username and email are required."
+        return username, email, student_id, "Username and email are required."
+
+    if require_student_id and not student_id:
+        return username, email, student_id, "Student ID is required."
 
     if password1 != password2:
-        return username, email, "Passwords do not match"
+        return username, email, student_id, "Passwords do not match"
 
     if User.objects.filter(username__iexact=username).exists():
-        return username, email, "Username already exists"
+        return username, email, student_id, "Username already exists"
+
+    if student_id and User.objects.filter(student_id__iexact=student_id).exists():
+        return username, email, student_id, "Student ID already exists"
 
     if User.objects.filter(email__iexact=email).exists():
-        return username, email, "Email already exists"
+        return username, email, student_id, "Email already exists"
 
     try:
         validate_password(password1, user=User(username=username, email=email))
     except ValidationError as exc:
-        return username, email, " ".join(exc.messages)
+        return username, email, student_id, " ".join(exc.messages)
 
-    return username, email, None
+    return username, email, student_id, None
+
+
+def get_user_by_login_identifier(identifier):
+    identifier = (identifier or '').strip()
+    if not identifier:
+        return None
+
+    student_id = normalize_student_id(identifier)
+    return User.objects.filter(
+        Q(username__iexact=identifier) | Q(student_id__iexact=student_id)
+    ).first()
 
 
 def student_signup(request):
     if request.method == 'POST':
         username = request.POST.get('username')
+        student_id = request.POST.get('student_id')
         email = request.POST.get('email')
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
-        username, email, validation_error = validate_signup_data(username, email, password1, password2)
+        username, email, student_id, validation_error = validate_signup_data(
+            username,
+            email,
+            password1,
+            password2,
+            student_id=student_id,
+            require_student_id=True,
+        )
         if validation_error:
             messages.error(request, validation_error)
             return redirect('student_signup')
 
         user = User.objects.create_user(username=username, email=email, password=password1)
         user.is_student = True
+        user.student_id = student_id
         user.save()
 
         send_notification_email(
@@ -221,7 +252,7 @@ def teacher_signup(request):
         email = request.POST.get('email')
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
-        username, email, validation_error = validate_signup_data(username, email, password1, password2)
+        username, email, _student_id, validation_error = validate_signup_data(username, email, password1, password2)
         if validation_error:
             messages.error(request, validation_error)
             return redirect('teacher_signup')
@@ -244,17 +275,14 @@ def teacher_signup(request):
 
 def user_login(request):
     if request.method == 'POST':
-        username = (request.POST.get('username') or '').strip()
+        login_identifier = (request.POST.get('username') or '').strip()
         password = request.POST.get('password') or ''
         
         # Get client IP
         client_ip = get_client_ip(request)
         
         # Try to get user for lockout check
-        try:
-            user_obj = User.objects.get(username__iexact=username)
-        except User.DoesNotExist:
-            user_obj = None
+        user_obj = get_user_by_login_identifier(login_identifier)
         
         # Check if account is locked
         if user_obj and user_obj.locked_until:
@@ -276,7 +304,8 @@ def user_login(request):
             return render(request, 'accounts/login.html')
         
         # Attempt authentication
-        user = authenticate(request, username=username, password=password)
+        auth_username = user_obj.username if user_obj else login_identifier
+        user = authenticate(request, username=auth_username, password=password)
 
         if user is not None:
             # Reset failed attempts on successful login
@@ -315,7 +344,7 @@ def user_login(request):
                     log_security_event("LOGIN_FAILED", user_obj, client_ip, f"Attempts: {user_obj.failed_login_attempts}")
             else:
                 messages.error(request, "Invalid username or password")
-                log_security_event("LOGIN_FAILED_UNKNOWN", None, client_ip, f"Unknown user: {username}")
+                log_security_event("LOGIN_FAILED_UNKNOWN", None, client_ip, f"Unknown user: {login_identifier}")
 
     return render(request, 'accounts/login.html')
 

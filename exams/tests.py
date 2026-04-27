@@ -618,6 +618,7 @@ class ExamWorkflowTests(TestCase):
             reverse('student_signup'),
             {
                 'username': 'newstudent',
+                'student_id': 'STU2001',
                 'email': 'newstudent@example.com',
                 'password1': 'strongpass123',
                 'password2': 'strongpass123',

@@ -8,7 +8,7 @@
             <h2>Student Profile</h2>
             <p class="text-muted mb-0">Track your information, exam history, and performance trend.</p>
         </div>
-        <span class="badge bg-dark">User: {{ request.user.username }}</span>
+        <span class="badge bg-dark">Student ID: {{ request.user.student_id|default:"Not set" }}</span>
     </div>
 
     <div class="row g-3 mb-4">
@@ -48,6 +48,7 @@
             <div class="card p-4 h-100">
                 <h5 class="mb-3">Profile Info</h5>
                 <p class="mb-2"><strong>Username:</strong> {{ request.user.username }}</p>
+                <p class="mb-2"><strong>Student ID:</strong> {{ request.user.student_id|default:"Not set" }}</p>
                 <p class="mb-2"><strong>Role:</strong> Student</p>
                 <p class="mb-2"><strong>Pass Count:</strong> {{ pass_count }}</p>
                 <p class="mb-2"><strong>Average Percentage:</strong> {{ avg_percentage }}%</p>

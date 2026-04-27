@@ -5,6 +5,7 @@ from django.db import models
 class User(AbstractUser):
     is_student = models.BooleanField(default=False)
     is_teacher = models.BooleanField(default=False)
+    student_id = models.CharField(max_length=30, unique=True, null=True, blank=True)
     
     # Security: Login attempt tracking
     failed_login_attempts = models.IntegerField(default=0)
