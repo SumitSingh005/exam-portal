@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
@@ -24,11 +25,9 @@ def log_security_event(event_type, user=None, ip_address=None, details=""):
     """
     Log security-related events for audit purposes.
     """
-    from datetime import datetime
     import os
     
-    log_dir = BASE_DIR = "C:/Users/sr538/OneDrive/Desktop/e-ExamPortal/exam_portal"
-    log_file = os.path.join(log_dir, "security.log")
+    log_file = getattr(settings, 'SECURITY_LOG_FILE', os.path.join(settings.BASE_DIR, "security.log"))
     
     timestamp = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
     username = user.username if user else "Anonymous"
@@ -150,7 +149,7 @@ def build_student_analytics(user):
         'pass_count': pass_count,
         'pending_reviews': pending_reviews,
         'results': results[:5],
-        'all_results': results,
+        'all_results': results,  # Chart needs all results for full history
         'exams': exams,
         'full_results': ordered_results,
         'improvement': improvement,

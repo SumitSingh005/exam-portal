@@ -2,9 +2,19 @@
 
 {% block content %}
 
-<div class="d-flex justify-content-center align-items-center" style="height:100vh;">
+<div class="auth-shell">
+    <section class="auth-panel">
+        <div class="quick-chip mb-3"><i class="bi bi-lock-fill"></i> Account access</div>
+        <h1>Sign in to {{ site_name }}</h1>
+        <p>Open your exam workspace, manage assessments, and continue where you left off.</p>
+        <div class="auth-highlights">
+            <span><i class="bi bi-check-circle-fill"></i> Role based dashboards</span>
+            <span><i class="bi bi-check-circle-fill"></i> Secure exam sessions</span>
+            <span><i class="bi bi-check-circle-fill"></i> Result analytics</span>
+        </div>
+    </section>
 
-    <div class="card shadow-lg p-4" style="width:400px; border-radius:15px;">
+    <div class="card auth-card p-4">
 
         <h3 class="text-center mb-4"><i class="bi bi-person-circle"></i> Login</h3>
 
@@ -51,7 +61,7 @@
                 </div>
             </div>
 
-            <button class="btn btn-primary w-100">Login</button>
+            <button class="btn btn-primary w-100" type="submit">Login</button>
         </form>
 
         <p class="text-center mt-3 mb-0">

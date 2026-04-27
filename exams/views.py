@@ -3,18 +3,40 @@ import csv
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail
+from django.core.mail import send_mail, send_mass_mail
 from django.db.models import Avg, Count, Max, Q
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
+from django.views.decorators.http import require_POST
 
 from accounts.decorators import student_required, teacher_required
 
 from .models import Exam, PortalSettings, Question, Result, ResultAnswer
 
-EXAM_SESSION_KEYS = ['question_ids', 'q_index', 'answers', 'current_exam_id', 'option_orders', 'exam_ready', 'anti_cheating']
+
+EXAM_SESSION_KEYS = (
+    'exam_ready',
+    'anti_cheating',
+    'question_ids',
+    'q_index',
+    'answers',
+    'current_exam_id',
+    'option_orders',
+)
+
+
+@login_required
+@student_required
+@require_POST
+def record_violation(request, exam_id):
+    """AJAX view to record anti-cheating violations in real-time to session."""
+    if request.session.get('current_exam_id') != exam_id:
+        return JsonResponse({'status': 'error', 'message': 'Invalid exam session'}, status=403)
+    
+    update_anti_cheating_state(request)
+    return JsonResponse({'status': 'success', 'state': get_anti_cheating_state(request)})
 
 
 def clear_exam_session(request):
@@ -257,21 +279,29 @@ def create_exam(request):
             max_attempts=max(max_attempts, 0),
             instructions=request.POST.get('instructions', '').strip(),
         )
+        
+        # Scale fix: Notify students efficiently
         student_emails = list(
             request.user.__class__.objects.filter(is_student=True)
             .exclude(email='')
             .values_list('email', flat=True)
         )
-        send_notification_email(
-            f"New Exam Created: {title}",
-            (
+        
+        recipient_emails = list(dict.fromkeys([request.user.email, *student_emails]))
+
+        if recipient_emails:
+            subject = f"New Exam Created: {title}"
+            message = (
                 f"A new exam '{title}' has been created.\n"
                 f"Start: {start_time}\n"
                 f"End: {end_time}\n"
                 f"Marking: +{correct_marks} / {wrong_marks}"
-            ),
-            [request.user.email] + student_emails,
-        )
+            )
+            # Use send_mass_mail to be more efficient than multiple send_mail calls
+            # even though it is still synchronous, it is optimized in Django
+            mail_tuple = (subject, message, None, recipient_emails)
+            send_mass_mail((mail_tuple,), fail_silently=True)
+
         messages.success(request, "Exam created successfully.")
         return redirect('dashboard')
 
@@ -594,7 +624,13 @@ def take_exam(request, exam_id):
             },
         })
 
-    current_q = Question.objects.get(id=question_ids[q_index])
+    try:
+        current_q = Question.objects.get(id=question_ids[q_index])
+    except Question.DoesNotExist:
+        # Crash fix: Handle deleted questions gracefully
+        request.session['q_index'] = q_index + 1
+        return redirect('take_exam', exam_id=exam.id)
+        
     current_saved_answer = answers.get(str(current_q.id), '')
     if current_q.question_type == 'mcq':
         current_option_order = option_orders.get(str(current_q.id), [1, 2, 3, 4])

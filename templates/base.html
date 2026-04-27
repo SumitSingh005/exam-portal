@@ -12,35 +12,53 @@
 
 <body>
 
-<nav class="navbar navbar-dark px-3 py-3">
-    <button class="btn btn-light" id="toggleBtn">Menu</button>
+<nav class="navbar navbar-dark app-navbar px-3 py-3">
+    <div class="navbar-brand-block">
+        <button class="icon-btn" id="toggleBtn" type="button" aria-label="Toggle menu">
+            <i class="bi bi-list"></i>
+        </button>
+        <a href="{% url 'dashboard' %}" class="app-brand">
+            <span class="brand-mark"><i class="bi bi-mortarboard-fill"></i></span>
+            <span>{{ site_name }}</span>
+        </a>
+    </div>
     <div class="navbar-actions ms-auto">
+        {% if user.is_authenticated %}
+        <span class="user-pill">
+            <i class="bi bi-person-circle"></i>
+            <span>{{ user.username }}</span>
+        </span>
+        {% endif %}
         <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">
             <i class="bi bi-moon-stars-fill"></i>
-            <span>Theme</span>
+            <span>Dark</span>
         </button>
-        <span class="text-white fw-bold">{{ site_name }}</span>
     </div>
 </nav>
 
 <div class="layout-shell">
     <div class="sidebar">
         <div class="sidebar-brand">
-            <h4>{{ site_name }}</h4>
-            <div class="sidebar-note">Exam workspace</div>
+            <div class="brand-mark"><i class="bi bi-layers-fill"></i></div>
+            <div>
+                <h4>{{ site_name }}</h4>
+                <div class="sidebar-note">
+                    {% if user.is_teacher %}Teacher workspace{% elif user.is_student %}Student workspace{% else %}Exam workspace{% endif %}
+                </div>
+            </div>
         </div>
 
-        <a href="{% url 'dashboard' %}" class="nav-link"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
-        <a href="{% url 'exam_list' %}" class="nav-link"><i class="bi bi-journal-check"></i> Exams</a>
+        <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+        <a href="{% url 'exam_list' %}" class="nav-link {% if request.resolver_match.url_name == 'exam_list' %}active{% endif %}"><i class="bi bi-journal-check"></i> Exams</a>
 
         {% if user.is_student %}
-        <a href="{% url 'student_profile' %}" class="nav-link"><i class="bi bi-person-badge"></i> Profile</a>
+        <a href="{% url 'student_profile' %}" class="nav-link {% if request.resolver_match.url_name == 'student_profile' %}active{% endif %}"><i class="bi bi-person-badge"></i> Profile</a>
         {% endif %}
 
         {% if user.is_teacher %}
-        <a href="{% url 'create_exam' %}" class="nav-link"><i class="bi bi-plus-square"></i> Create Exam</a>
-        <a href="{% url 'add_question' %}" class="nav-link"><i class="bi bi-patch-plus"></i> Add Question</a>
-        <a href="{% url 'teacher_exam_list' %}" class="nav-link"><i class="bi bi-kanban"></i> My Exams</a>
+        <a href="{% url 'create_exam' %}" class="nav-link {% if request.resolver_match.url_name == 'create_exam' %}active{% endif %}"><i class="bi bi-plus-square"></i> Create Exam</a>
+        <a href="{% url 'add_question' %}" class="nav-link {% if request.resolver_match.url_name == 'add_question' %}active{% endif %}"><i class="bi bi-patch-plus"></i> Add Question</a>
+        <a href="{% url 'teacher_exam_list' %}" class="nav-link {% if request.resolver_match.url_name == 'teacher_exam_list' %}active{% endif %}"><i class="bi bi-kanban"></i> My Exams</a>
         {% endif %}
 
         {% if user.is_authenticated %}
@@ -56,9 +74,9 @@
         {% endif %}
     </div>
 
-    <div class="content p-4 w-100">
+    <main class="content p-4 w-100">
         {% block content %}{% endblock %}
-    </div>
+    </main>
 </div>
 
 <script>

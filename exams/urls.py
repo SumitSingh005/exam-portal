@@ -7,6 +7,7 @@ urlpatterns = [
     path('instructions/<int:exam_id>/', views.exam_instructions, name='exam_instructions'),
     path('leaderboard/<int:exam_id>/', views.leaderboard, name='leaderboard'),
     path('take/<int:exam_id>/', views.take_exam, name='take_exam'),
+    path('take/<int:exam_id>/record-violation/', views.record_violation, name='record_violation'),
     path('results/', views.result_history, name='result_history'),
     path('create-exam/', views.create_exam, name='create_exam'),
     path('add-question/', views.add_question, name='add_question'),

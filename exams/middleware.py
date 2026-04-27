@@ -70,13 +70,19 @@ class RateLimitMiddleware:
         return len(recent_requests) < self.max_requests
     
     def clean_old_entries(self, client_ip):
-        """Remove entries older than the window."""
+        """Remove entries older than the window and cleanup keys."""
         now = time.time()
         window_start = now - self.window_seconds
+        
+        # Keep only recent requests
         self.request_history[client_ip] = [
             ts for ts in self.request_history[client_ip]
             if ts[0] >= window_start
         ]
+        
+        # Memory fix: if no requests left for this IP, remove the key entirely
+        if not self.request_history[client_ip]:
+            del self.request_history[client_ip]
 
 
 class SecurityHeadersMiddleware:

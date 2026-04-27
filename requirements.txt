@@ -8,11 +8,9 @@ cycler==0.12.1
 decorator==5.2.1
 Django==5.2.12
 django-browser-reload==1.21.0
-django-tailwind==4.4.2
 django-widget-tweaks==1.5.1
 djangorestframework==3.16.1
 executing==2.2.1
-Flask==3.1.2
 fonttools==4.61.1
 gunicorn==25.3.0
 ipython==9.8.0
@@ -35,7 +33,6 @@ pure_eval==0.2.3
 Pygments==2.19.2
 PyMySQL==1.1.2
 pyparsing==3.3.1
-pytailwindcss==0.3.0
 python-dateutil==2.9.0.post0
 pytz==2025.2
 six==1.17.0

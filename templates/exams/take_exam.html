@@ -180,10 +180,34 @@ function pushNote(note) {
     antiCheatingNotesInput.value = existing.slice(-6).join(" | ");
 }
 
-function registerViolation(input, displayText, note) {
+async function syncViolation() {
+    // Integrity fix: Sync violations to server in real-time
+    const formData = new FormData();
+    formData.append('tab_switch_count', tabSwitchInput.value);
+    formData.append('fullscreen_exit_count', fullscreenExitInput.value);
+    formData.append('copy_paste_count', copyPasteInput.value);
+    formData.append('webcam_warning_count', webcamWarningInput.value);
+    formData.append('anti_cheating_notes', antiCheatingNotesInput.value);
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+    try {
+        await fetch("{% url 'record_violation' exam.id %}", {
+            method: 'POST',
+            body: formData
+        });
+    } catch (e) {
+        console.error("Failed to sync violation", e);
+    }
+}
+
+async function registerViolation(input, displayText, note) {
     input.value = String(parseInt(input.value || "0", 10) + 1);
     pushNote(note);
     updateViolationDisplay();
+    
+    // Sync to server immediately
+    await syncViolation();
+    
     alert(displayText);
 
     if (parseInt(tabSwitchInput.value, 10) >= maxTabSwitches || getTotalViolations() >= maxViolations) {

@@ -14,13 +14,13 @@
     <!-- OVERLAY -->
     <div class="overlay"></div>
 
-    <!-- TEXT -->
     <div class="hero-text">
+        <div class="quick-chip hero-chip"><i class="bi bi-shield-check"></i> Secure online assessment</div>
 
         <h1>Welcome to {{ site_name }}</h1>
-        <p>Your smart online examination system{% if support_email %} | Support: {{ support_email }}{% endif %}</p>
+        <p>Create exams, attempt tests, review results, and track performance in one focused workspace.</p>
 
-        <div class="mt-4">
+        <div class="hero-actions mt-4">
             <a href="{% url 'login' %}" class="btn btn-primary">
                 <i class="bi bi-box-arrow-in-right"></i> Login
             </a>
@@ -29,6 +29,10 @@
                 <i class="bi bi-pencil-square"></i> Register
             </a>
         </div>
+
+        {% if support_email %}
+        <div class="hero-support">Support: {{ support_email }}</div>
+        {% endif %}
 
     </div>
 
