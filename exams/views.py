@@ -22,6 +22,8 @@ EXAM_SESSION_KEYS = (
     'question_ids',
     'q_index',
     'answers',
+    'marked_question_ids',
+    'pre_exam_webcam_warning',
     'current_exam_id',
     'option_orders',
 )
@@ -314,6 +316,7 @@ def add_question(request):
     exams = Exam.objects.filter(created_by=request.user)
     selected_exam_id = request.session.get('selected_exam')
     questions = None
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
     if selected_exam_id and not exams.filter(id=selected_exam_id).exists():
         request.session.pop('selected_exam', None)
@@ -331,6 +334,11 @@ def add_question(request):
             return redirect('add_question')
 
         if selected_exam_id and exams.filter(id=selected_exam_id).exists():
+            if action == "finish":
+                request.session.pop('selected_exam', None)
+                messages.success(request, "All questions added.")
+                return redirect('dashboard')
+
             question_type = request.POST.get('question_type', 'mcq')
             question_data, validation_error = validate_question_input(
                 question_type=question_type,
@@ -345,22 +353,32 @@ def add_question(request):
                 written_answer=request.POST.get('written_answer', ''),
             )
             if validation_error:
+                if is_ajax:
+                    return JsonResponse({'status': 'error', 'message': validation_error}, status=400)
                 messages.error(request, validation_error)
                 return redirect('add_question')
 
-            Question.objects.create(
+            question = Question.objects.create(
                 exam_id=selected_exam_id,
                 **question_data,
             )
 
             if action == "add":
+                if is_ajax:
+                    return JsonResponse({
+                        'status': 'success',
+                        'message': 'Question added.',
+                        'question': {
+                            'id': question.id,
+                            'text': question.question_text,
+                            'type': question.get_question_type_display(),
+                        },
+                    })
                 messages.success(request, "Question added.")
                 return redirect('add_question')
 
-            if action == "finish":
-                request.session.pop('selected_exam', None)
-                messages.success(request, "All questions added.")
-                return redirect('dashboard')
+        if is_ajax:
+            return JsonResponse({'status': 'error', 'message': 'Please select an exam first.'}, status=400)
 
     if selected_exam_id:
         questions = Question.objects.filter(exam_id=selected_exam_id).order_by('-id')
@@ -405,6 +423,8 @@ def exam_instructions(request, exam_id):
     if request.method == 'POST':
         clear_exam_session(request)
         request.session['exam_ready'] = exam.id
+        if request.POST.get('webcam_warning_count') == '1':
+            request.session['pre_exam_webcam_warning'] = True
         return redirect('take_exam', exam_id=exam.id)
 
     return render(request, 'exams/exam_instructions.html', {
@@ -441,6 +461,7 @@ def leaderboard(request, exam_id):
 @student_required
 def take_exam(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
     error_message = validate_exam_availability(exam)
     if error_message:
         messages.error(request, error_message)
@@ -463,9 +484,14 @@ def take_exam(request, exam_id):
         'question_ids' not in request.session
         or request.session.get('current_exam_id') != exam.id
     ):
+        pre_exam_webcam_warning = request.session.get('pre_exam_webcam_warning', False)
         clear_exam_session(request)
         request.session['exam_ready'] = exam.id
-        request.session['anti_cheating'] = default_anti_cheating_state()
+        anti_cheating_state = default_anti_cheating_state()
+        if pre_exam_webcam_warning:
+            anti_cheating_state['webcam_warning_count'] = 1
+            anti_cheating_state['notes'] = 'Webcam permission denied before exam start'
+        request.session['anti_cheating'] = anti_cheating_state
         questions = list(Question.objects.filter(exam=exam))
 
         if not questions:
@@ -488,6 +514,7 @@ def take_exam(request, exam_id):
         request.session['question_ids'] = [q.id for q in questions]
         request.session['q_index'] = 0
         request.session['answers'] = {}
+        request.session['marked_question_ids'] = []
         request.session['current_exam_id'] = exam.id
         request.session['option_orders'] = {
             str(q.id): random.sample([1, 2, 3, 4], 4)
@@ -497,8 +524,38 @@ def take_exam(request, exam_id):
     question_ids = request.session.get('question_ids')
     q_index = request.session.get('q_index', 0)
     answers = request.session.get('answers', {})
+    marked_question_ids = [str(qid) for qid in request.session.get('marked_question_ids', [])]
     option_orders = request.session.get('option_orders', {})
     anti_cheating = update_anti_cheating_state(request)
+
+    def build_exam_question_payload(index):
+        question = Question.objects.filter(id=question_ids[index]).first()
+        if question is None:
+            return None
+        saved_answer = answers.get(str(question.id), '')
+        if question.question_type == 'mcq':
+            option_order = option_orders.get(str(question.id), [1, 2, 3, 4])
+            options = build_question_options(question, option_order)
+        else:
+            options = []
+
+        return {
+            'status': 'success',
+            'question': {
+                'id': question.id,
+                'text': question.question_text,
+                'type': question.question_type,
+                'options': options,
+                'saved_answer': saved_answer,
+                'marked_for_review': str(question.id) in marked_question_ids,
+            },
+            'q_index': index + 1,
+            'total': len(question_ids),
+            'is_first': index == 0,
+            'is_final': index + 1 >= len(question_ids),
+            'answered_count': len(answers),
+            'marked_count': len(marked_question_ids),
+        }
 
     if q_index >= len(question_ids):
         answer_rows = []
@@ -639,26 +696,81 @@ def take_exam(request, exam_id):
         question_options = []
 
     if request.method == 'POST':
+        action = request.POST.get('action', 'save_next')
         if anti_cheating['auto_submitted']:
             request.session['q_index'] = len(question_ids)
+            if is_ajax:
+                return JsonResponse({'status': 'complete', 'redirect_url': request.path})
             return redirect('take_exam', exam_id=exam.id)
 
         selected = request.POST.get('answer') if current_q.question_type == 'mcq' else request.POST.get('written_answer')
-        if not selected or not str(selected).strip():
-            return render(request, 'exams/take_exam.html', {
-                'exam': exam,
-                'question': current_q,
-                'question_options': question_options,
-                'q_index': q_index + 1,
-                'total': len(question_ids),
-                'error': "Select an option.",
-                'anti_cheating': anti_cheating,
-                'current_saved_answer': current_saved_answer,
-            })
+        if action == 'previous':
+            previous_index = max(q_index - 1, 0)
+            request.session['q_index'] = previous_index
+            if is_ajax:
+                payload = build_exam_question_payload(previous_index)
+                if payload is not None:
+                    return JsonResponse(payload)
+                return JsonResponse({'status': 'complete', 'redirect_url': request.path})
+            return redirect('take_exam', exam_id=exam.id)
 
-        answers[str(current_q.id)] = selected
-        request.session['answers'] = answers
-        request.session['q_index'] = q_index + 1
+        if action == 'clear_response':
+            answers.pop(str(current_q.id), None)
+            if str(current_q.id) in marked_question_ids:
+                marked_question_ids.remove(str(current_q.id))
+            request.session['answers'] = answers
+            request.session['marked_question_ids'] = marked_question_ids
+            if is_ajax:
+                payload = build_exam_question_payload(q_index)
+                if payload is not None:
+                    return JsonResponse(payload)
+                return JsonResponse({'status': 'complete', 'redirect_url': request.path})
+            return redirect('take_exam', exam_id=exam.id)
+
+        if action == 'mark_review':
+            if selected and str(selected).strip():
+                answers[str(current_q.id)] = selected
+            else:
+                answers.pop(str(current_q.id), None)
+
+            if str(current_q.id) not in marked_question_ids:
+                marked_question_ids.append(str(current_q.id))
+
+            request.session['answers'] = answers
+            request.session['marked_question_ids'] = marked_question_ids
+            request.session['q_index'] = q_index + 1
+        else:
+            if not selected or not str(selected).strip():
+                if is_ajax:
+                    return JsonResponse({'status': 'error', 'message': 'Select an option.'}, status=400)
+                return render(request, 'exams/take_exam.html', {
+                    'exam': exam,
+                    'question': current_q,
+                    'question_options': question_options,
+                    'q_index': q_index + 1,
+                    'total': len(question_ids),
+                    'error': "Select an option.",
+                    'anti_cheating': anti_cheating,
+                    'current_saved_answer': current_saved_answer,
+                })
+
+            answers[str(current_q.id)] = selected
+            if str(current_q.id) in marked_question_ids:
+                marked_question_ids.remove(str(current_q.id))
+
+            request.session['answers'] = answers
+            request.session['marked_question_ids'] = marked_question_ids
+            request.session['q_index'] = q_index + 1
+
+        if is_ajax and q_index + 1 < len(question_ids):
+            payload = build_exam_question_payload(q_index + 1)
+            if payload is not None:
+                return JsonResponse(payload)
+            return JsonResponse({'status': 'complete', 'redirect_url': request.path})
+
+        if is_ajax:
+            return JsonResponse({'status': 'complete', 'redirect_url': request.path})
+
         return redirect('take_exam', exam_id=exam.id)
 
     return render(request, 'exams/take_exam.html', {
@@ -669,6 +781,9 @@ def take_exam(request, exam_id):
         'total': len(question_ids),
         'anti_cheating': anti_cheating,
         'current_saved_answer': current_saved_answer,
+        'is_marked_for_review': str(current_q.id) in marked_question_ids,
+        'answered_count': len(answers),
+        'marked_count': len(marked_question_ids),
     })
 
 

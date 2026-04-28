@@ -16,6 +16,8 @@
         </div>
     </div>
 
+    <div id="questionAlert" class="d-none"></div>
+
     {% if messages %}
         {% for message in messages %}
             <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} app-card border-0 mb-3">
@@ -49,7 +51,7 @@
                     <div class="form-section-title">Create Question</div>
                     <div class="form-section-subtitle">Add MCQ choices or define the expected written answer for review.</div>
 
-                    <form method="post" id="questionForm">
+                    <form method="post" action="{% url 'add_question' %}" id="questionForm">
                         {% csrf_token %}
 
                         <div class="mb-3">
@@ -103,8 +105,9 @@
 
                         <div class="d-flex gap-2 mt-4 flex-wrap">
                             <button type="submit" name="action" value="add" class="btn btn-success">Add Question</button>
-                            <button type="submit" name="action" value="finish" class="btn btn-primary">Finish</button>
+                            <button type="submit" name="action" value="finish" class="btn btn-primary" formnovalidate>Finish</button>
                         </div>
+                        <div id="questionFormStatus" class="small text-muted mt-3" aria-live="polite"></div>
                     </form>
                 </div>
                 {% endif %}
@@ -116,7 +119,7 @@
                 <h5 class="panel-title">Recent Questions</h5>
                 <p class="panel-subtitle mb-3">Keep an eye on what you just added.</p>
                 {% if selected_exam %}
-                <div class="activity-list">
+                <div class="activity-list" id="recentQuestionsList">
                     {% for q in questions|slice:":5" %}
                     <div class="activity-item">
                         <div>
@@ -142,6 +145,56 @@ document.addEventListener("DOMContentLoaded", function() {
     const questionType = document.getElementById("questionType");
     const mcqFields = document.getElementById("mcqFields");
     const writtenFields = document.getElementById("writtenFields");
+    const questionAlert = document.getElementById("questionAlert");
+    const recentQuestionsList = document.getElementById("recentQuestionsList");
+    const questionFormStatus = document.getElementById("questionFormStatus");
+    let fallbackSubmit = false;
+
+    function showQuestionAlert(message, isSuccess) {
+        if (!questionAlert) {
+            return;
+        }
+
+        questionAlert.className = "alert " + (isSuccess ? "alert-success" : "alert-danger") + " app-card border-0 mb-3";
+        questionAlert.textContent = message;
+
+        if (questionFormStatus) {
+            questionFormStatus.className = "small mt-3 " + (isSuccess ? "text-success" : "text-danger");
+            questionFormStatus.textContent = message;
+        }
+    }
+
+    function prependRecentQuestion(question) {
+        if (!recentQuestionsList || !question) {
+            return;
+        }
+
+        const emptyMessage = recentQuestionsList.querySelector("p");
+        if (emptyMessage) {
+            emptyMessage.remove();
+        }
+
+        const item = document.createElement("div");
+        item.className = "activity-item";
+
+        const content = document.createElement("div");
+        const title = document.createElement("div");
+        title.className = "activity-title";
+        title.textContent = question.text;
+
+        const meta = document.createElement("div");
+        meta.className = "activity-meta";
+        meta.textContent = question.type;
+
+        content.appendChild(title);
+        content.appendChild(meta);
+        item.appendChild(content);
+        recentQuestionsList.prepend(item);
+
+        while (recentQuestionsList.children.length > 5) {
+            recentQuestionsList.lastElementChild.remove();
+        }
+    }
 
     function toggleQuestionFields() {
         if (!questionType) {
@@ -154,11 +207,63 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     if (form) {
-        form.addEventListener("submit", function() {
-            setTimeout(() => {
+        form.addEventListener("submit", async function(event) {
+            const submitter = event.submitter;
+            if (fallbackSubmit) {
+                fallbackSubmit = false;
+                return;
+            }
+
+            if (!submitter || submitter.value !== "add") {
+                if (submitter && submitter.value === "finish") {
+                    showQuestionAlert("Finishing question entry...", true);
+                }
+                return;
+            }
+
+            event.preventDefault();
+            submitter.disabled = true;
+            showQuestionAlert("Saving question...", true);
+
+            try {
+                const response = await fetch(form.action || window.location.href, {
+                    method: "POST",
+                    body: new FormData(form),
+                    credentials: "same-origin",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
+                });
+                const contentType = response.headers.get("content-type") || "";
+                if (!contentType.includes("application/json")) {
+                    fallbackSubmit = true;
+                    if (submitter.name) {
+                        const actionInput = document.createElement("input");
+                        actionInput.type = "hidden";
+                        actionInput.name = submitter.name;
+                        actionInput.value = submitter.value;
+                        form.appendChild(actionInput);
+                    }
+                    form.submit();
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (!response.ok || data.status !== "success") {
+                    showQuestionAlert(data.message || "Unable to add question.", false);
+                    return;
+                }
+
+                prependRecentQuestion(data.question);
+                showQuestionAlert(data.message || "Question added.", true);
                 form.reset();
                 toggleQuestionFields();
-            }, 100);
+            } catch (error) {
+                showQuestionAlert("Unable to add question. Please try again.", false);
+            } finally {
+                submitter.disabled = false;
+            }
         });
     }
 

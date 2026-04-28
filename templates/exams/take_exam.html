@@ -3,12 +3,20 @@
 {% block content %}
 
 <div class="container-fluid">
+    <div class="fullscreen-gate" id="fullscreenGate">
+        <div class="fullscreen-gate-panel">
+            <h3>Enter Fullscreen</h3>
+            <p>Fullscreen mode is required before you can continue the exam.</p>
+            <button class="btn btn-primary" id="fullscreenGateBtn" type="button">Enter Fullscreen</button>
+        </div>
+    </div>
+
     <div class="dashboard-hero">
         <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
             <div>
                 <div class="quick-chip mb-3"><i class="bi bi-shield-exclamation"></i> Monitored Exam</div>
                 <h2>{{ exam.title }}</h2>
-                <p class="panel-subtitle">Question {{ q_index }} / {{ total }} | Stay on this page and remain in fullscreen mode during the attempt.</p>
+                <p class="panel-subtitle">Question <span id="questionNumber">{{ q_index }}</span> / <span id="questionTotal">{{ total }}</span> | Stay on this page and remain in fullscreen mode during the attempt.</p>
             </div>
             <div class="dashboard-actions">
                 <span class="quick-chip text-danger">Time Left: <span id="timer"></span></span>
@@ -20,9 +28,7 @@
     <div class="row g-4">
         <div class="col-xl-8">
             <div class="card p-4 shadow">
-    {% if error %}
-    <div class="alert alert-danger">{{ error }}</div>
-    {% endif %}
+    <div class="alert alert-danger {% if not error %}d-none{% endif %}" id="answerError">{{ error }}</div>
 
     <form method="post" id="examForm">
         {% csrf_token %}
@@ -33,26 +39,38 @@
         <input type="hidden" name="auto_submitted" id="autoSubmitted" value="0">
         <input type="hidden" name="anti_cheating_notes" id="antiCheatingNotes" value="{{ anti_cheating.notes|default:'' }}">
 
-        <p><strong>{{ question.question_text }}</strong></p>
+        <p><strong id="questionText">{{ question.question_text }}</strong></p>
+        <div class="d-flex gap-2 flex-wrap mb-3">
+            <span class="quick-chip">Answered: <span id="answeredCount">{{ answered_count|default:0 }}</span></span>
+            <span class="quick-chip">Marked: <span id="markedCount">{{ marked_count|default:0 }}</span></span>
+            <span class="quick-chip {% if not is_marked_for_review %}d-none{% endif %}" id="markedBadge">Marked for review</span>
+        </div>
 
-        {% if question.question_type == 'written' %}
-        <textarea class="form-control" name="written_answer" id="writtenAnswerField" rows="5" placeholder="Write your answer here" required>{{ current_saved_answer }}</textarea>
-        {% else %}
-            {% for option in question_options %}
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="answer" value="{{ option.value }}" id="{{ option.id }}" {% if current_saved_answer|stringformat:"s" == option.value|stringformat:"s" %}checked{% endif %}>
-                <label class="form-check-label" for="{{ option.id }}">{{ option.label }}</label>
-            </div>
-            {% endfor %}
-        {% endif %}
+        <div id="answerFields">
+            {% if question.question_type == 'written' %}
+            <textarea class="form-control" name="written_answer" id="writtenAnswerField" rows="5" placeholder="Write your answer here" required>{{ current_saved_answer }}</textarea>
+            {% else %}
+                {% for option in question_options %}
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="answer" value="{{ option.value }}" id="{{ option.id }}" {% if current_saved_answer|stringformat:"s" == option.value|stringformat:"s" %}checked{% endif %}>
+                    <label class="form-check-label" for="{{ option.id }}">{{ option.label }}</label>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
 
         <br>
 
-        {% if q_index < total %}
-        <button class="btn btn-primary" type="submit">Next</button>
-        {% else %}
-        <button class="btn btn-success" type="submit" id="finalSubmitBtn">Submit Exam</button>
-        {% endif %}
+        <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-outline-dark {% if q_index <= 1 %}d-none{% endif %}" type="submit" name="action" value="previous" id="previousBtn" formnovalidate>Previous</button>
+            <button class="btn btn-outline-warning" type="submit" name="action" value="mark_review" id="markReviewBtn" formnovalidate>Mark for Review</button>
+            {% if q_index < total %}
+            <button class="btn btn-primary" type="submit" name="action" value="save_next" id="nextSubmitBtn">Save & Next</button>
+            {% else %}
+            <button class="btn btn-success" type="submit" id="finalSubmitBtn">Submit Exam</button>
+            {% endif %}
+            <button class="btn btn-outline-secondary" type="button" id="clearResponseBtn">Clear Response</button>
+        </div>
     </form>
             </div>
         </div>
@@ -86,8 +104,8 @@
                     </div>
                     <div class="activity-item">
                         <div>
-                            <div class="activity-title">Webcam Warnings</div>
-                            <div class="activity-meta">Missing webcam permission is recorded.</div>
+                            <div class="activity-title">Webcam Status</div>
+                            <div class="activity-meta">Camera permission is not required for this exam.</div>
                         </div>
                         <div class="activity-title" id="webcamWarningDisplay">{{ anti_cheating.webcam_warning_count|default:0 }}</div>
                     </div>
@@ -107,13 +125,61 @@
     padding: 8px 10px;
     border-radius: 12px;
 }
+
+.fullscreen-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(8, 15, 23, 0.92);
+    padding: 24px;
+}
+
+.fullscreen-gate.show {
+    display: flex;
+}
+
+.fullscreen-gate-panel {
+    width: min(420px, 100%);
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 28px;
+    text-align: center;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+}
+
+.fullscreen-gate-panel h3 {
+    margin-bottom: 10px;
+}
+
+.fullscreen-gate-panel p {
+    color: #5c6670;
+    margin-bottom: 20px;
+}
 </style>
 
 <script>
 const timerKey = "timeLeft_{{ exam.id }}";
+const fullscreenStartedKey = "fullscreenStarted_{{ exam.id }}";
 const form = document.getElementById("examForm");
-const finalSubmitBtn = document.getElementById("finalSubmitBtn");
+let finalSubmitBtn = document.getElementById("finalSubmitBtn");
+let nextSubmitBtn = document.getElementById("nextSubmitBtn");
+let markReviewBtn = document.getElementById("markReviewBtn");
+let clearResponseBtn = document.getElementById("clearResponseBtn");
+let previousBtn = document.getElementById("previousBtn");
 const fullscreenBtn = document.getElementById("fullscreenBtn");
+const fullscreenGate = document.getElementById("fullscreenGate");
+const fullscreenGateBtn = document.getElementById("fullscreenGateBtn");
+const questionNumber = document.getElementById("questionNumber");
+const questionTotal = document.getElementById("questionTotal");
+const questionText = document.getElementById("questionText");
+const answeredCount = document.getElementById("answeredCount");
+const markedCount = document.getElementById("markedCount");
+const markedBadge = document.getElementById("markedBadge");
+const answerFields = document.getElementById("answerFields");
+const answerError = document.getElementById("answerError");
 const violationBanner = document.getElementById("violationBanner");
 const tabSwitchInput = document.getElementById("tabSwitchCount");
 const fullscreenExitInput = document.getElementById("fullscreenExitCount");
@@ -121,18 +187,20 @@ const copyPasteInput = document.getElementById("copyPasteCount");
 const webcamWarningInput = document.getElementById("webcamWarningCount");
 const autoSubmittedInput = document.getElementById("autoSubmitted");
 const antiCheatingNotesInput = document.getElementById("antiCheatingNotes");
-const answerInputs = document.querySelectorAll('input[name="answer"]');
-const writtenAnswerField = document.getElementById("writtenAnswerField");
+let answerInputs = document.querySelectorAll('input[name="answer"]');
+let writtenAnswerField = document.getElementById("writtenAnswerField");
 const tabSwitchDisplay = document.getElementById("tabSwitchDisplay");
 const fullscreenExitDisplay = document.getElementById("fullscreenExitDisplay");
 const copyPasteDisplay = document.getElementById("copyPasteDisplay");
 const webcamWarningDisplay = document.getElementById("webcamWarningDisplay");
-const draftAnswerKey = "draftAnswer_{{ exam.id }}_{{ question.id }}";
-const draftAnswerType = "{{ question.question_type }}";
+let currentQuestionId = "{{ question.id }}";
+let draftAnswerKey = "draftAnswer_{{ exam.id }}_" + currentQuestionId;
+let draftAnswerType = "{{ question.question_type }}";
 let totalTime = {{ exam.duration }} * 60;
 const maxViolations = 5;
 const maxTabSwitches = 3;
 let autoSubmitted = false;
+let hasEnteredFullscreen = Boolean(document.fullscreenElement) || sessionStorage.getItem(fullscreenStartedKey) === "1";
 
 if (!localStorage.getItem(timerKey)) {
     localStorage.setItem(timerKey, totalTime);
@@ -161,8 +229,7 @@ function getTotalViolations() {
     return (
         parseInt(tabSwitchInput.value || "0", 10) +
         parseInt(fullscreenExitInput.value || "0", 10) +
-        parseInt(copyPasteInput.value || "0", 10) +
-        parseInt(webcamWarningInput.value || "0", 10)
+        parseInt(copyPasteInput.value || "0", 10)
     );
 }
 
@@ -215,6 +282,26 @@ async function registerViolation(input, displayText, note) {
     }
 }
 
+function updateFullscreenGate() {
+    if (!fullscreenGate) {
+        return;
+    }
+
+    fullscreenGate.classList.toggle("show", !hasEnteredFullscreen);
+}
+
+async function enterFullscreen() {
+    const elem = document.documentElement;
+    try {
+        if (elem.requestFullscreen) {
+            await elem.requestFullscreen();
+        }
+    } catch (error) {
+        console.error("Fullscreen request failed", error);
+    }
+    updateFullscreenGate();
+}
+
 function autoSubmitExam(message) {
     if (autoSubmitted) {
         return;
@@ -225,6 +312,7 @@ function autoSubmitExam(message) {
         alert(message);
     }
     localStorage.removeItem(timerKey);
+    sessionStorage.removeItem(fullscreenStartedKey);
     form.submit();
 }
 
@@ -255,6 +343,147 @@ function persistDraftAnswer(value) {
     localStorage.setItem(draftAnswerKey, value);
 }
 
+function bindDraftHandlers() {
+    writtenAnswerField = document.getElementById("writtenAnswerField");
+    answerInputs = document.querySelectorAll('input[name="answer"]');
+
+    if (writtenAnswerField) {
+        writtenAnswerField.addEventListener("input", function() {
+            persistDraftAnswer(writtenAnswerField.value);
+        });
+    }
+
+    if (answerInputs.length) {
+        answerInputs.forEach((input) => {
+            input.addEventListener("change", function() {
+                persistDraftAnswer(input.value);
+            });
+        });
+    }
+}
+
+function clearResponse() {
+    submitExamAction(clearResponseBtn, "clear_response");
+}
+
+function clearCurrentAnswerFields() {
+    writtenAnswerField = document.getElementById("writtenAnswerField");
+    answerInputs = document.querySelectorAll('input[name="answer"]');
+
+    if (writtenAnswerField) {
+        writtenAnswerField.value = "";
+    }
+
+    answerInputs.forEach((input) => {
+        input.checked = false;
+    });
+
+    localStorage.removeItem(draftAnswerKey);
+    if (answerError) {
+        answerError.classList.add("d-none");
+        answerError.textContent = "";
+    }
+}
+
+function renderAnswerFields(question) {
+    answerFields.innerHTML = "";
+    draftAnswerType = question.type;
+    currentQuestionId = String(question.id);
+    draftAnswerKey = "draftAnswer_{{ exam.id }}_" + currentQuestionId;
+
+    if (question.type === "written") {
+        const textarea = document.createElement("textarea");
+        textarea.className = "form-control";
+        textarea.name = "written_answer";
+        textarea.id = "writtenAnswerField";
+        textarea.rows = 5;
+        textarea.placeholder = "Write your answer here";
+        textarea.required = true;
+        textarea.value = question.saved_answer || "";
+        answerFields.appendChild(textarea);
+        bindDraftHandlers();
+        restoreDraftAnswer();
+        return;
+    }
+
+    question.options.forEach((option) => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "form-check";
+
+        const input = document.createElement("input");
+        input.className = "form-check-input";
+        input.type = "radio";
+        input.name = "answer";
+        input.value = option.value;
+        input.id = option.id;
+        if (String(question.saved_answer || "") === String(option.value)) {
+            input.checked = true;
+        }
+
+        const label = document.createElement("label");
+        label.className = "form-check-label";
+        label.htmlFor = option.id;
+        label.textContent = option.label;
+
+        wrapper.appendChild(input);
+        wrapper.appendChild(label);
+        answerFields.appendChild(wrapper);
+    });
+
+    bindDraftHandlers();
+    restoreDraftAnswer();
+}
+
+function renderQuestion(data) {
+    questionNumber.textContent = data.q_index;
+    questionTotal.textContent = data.total;
+    questionText.textContent = data.question.text;
+    answeredCount.textContent = data.answered_count || 0;
+    markedCount.textContent = data.marked_count || 0;
+    markedBadge.classList.toggle("d-none", !data.question.marked_for_review);
+    renderAnswerFields(data.question);
+
+    if (answerError) {
+        answerError.classList.add("d-none");
+        answerError.textContent = "";
+    }
+
+    if (data.is_final) {
+        nextSubmitBtn = document.getElementById("nextSubmitBtn");
+        if (nextSubmitBtn) {
+            const submitBtn = document.createElement("button");
+            submitBtn.className = "btn btn-success";
+            submitBtn.type = "submit";
+            submitBtn.id = "finalSubmitBtn";
+            submitBtn.textContent = "Submit Exam";
+            nextSubmitBtn.replaceWith(submitBtn);
+            finalSubmitBtn = submitBtn;
+            nextSubmitBtn = null;
+        }
+    } else if (!nextSubmitBtn) {
+        const submitBtn = document.createElement("button");
+        submitBtn.className = "btn btn-primary";
+        submitBtn.type = "submit";
+        submitBtn.name = "action";
+        submitBtn.value = "save_next";
+        submitBtn.id = "nextSubmitBtn";
+        submitBtn.textContent = "Save & Next";
+        finalSubmitBtn.replaceWith(submitBtn);
+        nextSubmitBtn = submitBtn;
+        finalSubmitBtn = null;
+    }
+
+    previousBtn = document.getElementById("previousBtn");
+    markReviewBtn = document.getElementById("markReviewBtn");
+    clearResponseBtn = document.getElementById("clearResponseBtn");
+    if (previousBtn) {
+        previousBtn.classList.toggle("d-none", data.is_first);
+    }
+    if (clearResponseBtn) {
+        clearResponseBtn.addEventListener("click", clearResponse);
+    }
+}
+
 document.addEventListener("visibilitychange", function() {
     if (document.hidden) {
         registerViolation(tabSwitchInput, "Tab switching detected!", "Tab switch detected");
@@ -263,8 +492,16 @@ document.addEventListener("visibilitychange", function() {
 
 document.addEventListener("fullscreenchange", function() {
     if (!document.fullscreenElement) {
-        registerViolation(fullscreenExitInput, "Fullscreen exit detected!", "Fullscreen exited");
+        if (hasEnteredFullscreen) {
+            registerViolation(fullscreenExitInput, "Fullscreen exit detected!", "Fullscreen exited");
+        }
+        updateFullscreenGate();
+        return;
     }
+
+    hasEnteredFullscreen = true;
+    sessionStorage.setItem(fullscreenStartedKey, "1");
+    updateFullscreenGate();
 });
 
 document.addEventListener("contextmenu", e => {
@@ -287,10 +524,76 @@ document.addEventListener("paste", e => {
     registerViolation(copyPasteInput, "Pasting is not allowed during the exam!", "Paste attempt blocked");
 });
 
-form.addEventListener("submit", function(e) {
+async function submitExamAction(actionButton, actionValue) {
+    if (!hasEnteredFullscreen) {
+        updateFullscreenGate();
+        alert("Please enter fullscreen before starting the exam.");
+        return;
+    }
+
+    actionButton.disabled = true;
+    const formData = new FormData(form);
+    formData.set("action", actionValue);
+
+    try {
+        const response = await fetch(window.location.href, {
+            method: "POST",
+            body: formData,
+            credentials: "same-origin",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+            },
+        });
+        const data = await response.json();
+
+        if (!response.ok || data.status === "error") {
+            if (answerError) {
+                answerError.textContent = data.message || "Select an option.";
+                answerError.classList.remove("d-none");
+            }
+            return;
+        }
+
+        localStorage.removeItem(draftAnswerKey);
+
+        if (data.status === "complete" && data.redirect_url) {
+            window.location.href = data.redirect_url;
+            return;
+        }
+
+        renderQuestion(data);
+    } catch (error) {
+        form.submit();
+    } finally {
+        if (actionButton) {
+            actionButton.disabled = false;
+        }
+    }
+}
+
+form.addEventListener("submit", async function(e) {
     if (autoSubmittedInput.value === "1") {
         localStorage.removeItem(draftAnswerKey);
         localStorage.removeItem(timerKey);
+        sessionStorage.removeItem(fullscreenStartedKey);
+        return;
+    }
+
+    if (!hasEnteredFullscreen) {
+        e.preventDefault();
+        updateFullscreenGate();
+        alert("Please enter fullscreen before starting the exam.");
+        return;
+    }
+
+    if (
+        (nextSubmitBtn && e.submitter === nextSubmitBtn) ||
+        (markReviewBtn && e.submitter === markReviewBtn) ||
+        (previousBtn && e.submitter === previousBtn)
+    ) {
+        e.preventDefault();
+        const actionButton = e.submitter;
+        await submitExamAction(actionButton, actionButton.value);
         return;
     }
 
@@ -300,6 +603,7 @@ form.addEventListener("submit", function(e) {
             e.preventDefault();
             return;
         }
+        sessionStorage.removeItem(fullscreenStartedKey);
     }
 
     if (!finalSubmitBtn || e.submitter === finalSubmitBtn) {
@@ -309,52 +613,27 @@ form.addEventListener("submit", function(e) {
     localStorage.removeItem(draftAnswerKey);
 });
 
-async function requestWebcamPermission() {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        registerViolation(webcamWarningInput, "Webcam access is not available on this device.", "Webcam unavailable");
-        return;
-    }
-
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        stream.getTracks().forEach(track => track.stop());
-    } catch (error) {
-        registerViolation(webcamWarningInput, "Webcam permission denied or unavailable. This has been recorded.", "Webcam permission warning");
-    }
-}
-
 window.onload = function() {
-    let elem = document.documentElement;
-    if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-    }
-    requestWebcamPermission();
     restoreDraftAnswer();
     updateViolationDisplay();
+    updateFullscreenGate();
 };
 
 if (fullscreenBtn) {
     fullscreenBtn.addEventListener("click", function() {
-        const elem = document.documentElement;
-        if (elem.requestFullscreen) {
-            elem.requestFullscreen();
-        }
+        enterFullscreen();
     });
 }
 
-if (writtenAnswerField) {
-    writtenAnswerField.addEventListener("input", function() {
-        persistDraftAnswer(writtenAnswerField.value);
-    });
+if (fullscreenGateBtn) {
+    fullscreenGateBtn.addEventListener("click", enterFullscreen);
 }
 
-if (answerInputs.length) {
-    answerInputs.forEach((input) => {
-        input.addEventListener("change", function() {
-            persistDraftAnswer(input.value);
-        });
-    });
+if (clearResponseBtn) {
+    clearResponseBtn.addEventListener("click", clearResponse);
 }
+
+bindDraftHandlers();
 </script>
 
-{% endblock %}
+{% endblock %}  

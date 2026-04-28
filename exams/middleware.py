@@ -3,6 +3,7 @@ Security middleware for rate limiting and login attempt tracking.
 """
 import time
 from collections import defaultdict
+from django.conf import settings
 from django.http import JsonResponse
 
 
@@ -15,9 +16,8 @@ class RateLimitMiddleware:
         self.get_response = get_response
         # Track requests: {ip: [(timestamp, path)]}
         self.request_history = defaultdict(list)
-        # Configuration
-        self.window_seconds = 60  # 1 minute window
-        self.max_requests = 30    # Max requests per window
+        self.window_seconds = settings.RATE_LIMIT_WINDOW_SECONDS
+        self.max_requests = settings.RATE_LIMIT_MAX_REQUESTS
     
     def __call__(self, request):
         # Get client IP

@@ -4,78 +4,178 @@
 
 <div class="container mt-4">
     <div class="card shadow p-4">
-        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
-            <div>
-                <h2 class="mb-1">{{ exam.title }}</h2>
-                <p class="text-muted mb-0">Read these instructions carefully before starting the exam.</p>
-            </div>
-            <a href="{% url 'exam_list' %}" class="btn btn-outline-dark">Back to Exams</a>
-        </div>
-
-        <div class="row g-3 mb-4">
-            <div class="col-md-4">
-                <div class="card h-100 p-3">
-                    <h6>Duration</h6>
-                    <p class="mb-0">{{ exam.duration }} minutes</p>
+        <div class="dashboard-hero">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <div class="quick-chip mb-3"><i class="bi bi-journal-text"></i> Exam Instructions</div>
+                    <h2 class="mb-1">{{ exam.title }}</h2>
+                    <p class="panel-subtitle">Read these instructions carefully before starting the exam.</p>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100 p-3">
-                    <h6>Marking</h6>
-                    <p class="mb-0">+{{ exam.correct_marks }} for correct, {{ exam.wrong_marks }} for wrong</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100 p-3">
-                    <h6>Attempts</h6>
-                    <p class="mb-0">
-                        {% if exam.has_unlimited_attempts %}
-                        Unlimited attempts
-                        {% else %}
-                        {{ remaining_attempts }} left out of {{ exam.max_attempts }}
-                        {% endif %}
-                    </p>
-                </div>
+                <a href="{% url 'exam_list' %}" class="btn btn-outline-dark">Back to Exams</a>
             </div>
         </div>
 
-        <div class="card p-3 mb-4">
-            <h5 class="mb-3">Exam Rules</h5>
-            <ul class="mb-0">
-                <li>The exam can only be taken during the scheduled time window.</li>
-                <li>Once started, the timer continues until submission or timeout.</li>
-                <li>Each correct answer gives {{ exam.correct_marks }} marks.</li>
-                <li>Each wrong answer gives {{ exam.wrong_marks }} marks.</li>
-                <li>
+        <div class="summary-strip mb-4">
+            <div class="summary-pill">
+                <span class="muted-label">Duration</span>
+                <strong>{{ exam.duration }} minutes</strong>
+            </div>
+            <div class="summary-pill">
+                <span class="muted-label">Marking</span>
+                <strong>+{{ exam.correct_marks }} / {{ exam.wrong_marks }}</strong>
+            </div>
+            <div class="summary-pill">
+                <span class="muted-label">Attempts</span>
+                <strong>
                     {% if exam.has_unlimited_attempts %}
-                    You can retake this exam without any attempt limit.
+                    Unlimited attempts
                     {% else %}
-                    You can attempt this exam up to {{ exam.max_attempts }} time{{ exam.max_attempts|pluralize }}.
+                    {{ remaining_attempts }} left of {{ exam.max_attempts }}
                     {% endif %}
-                </li>
-                <li>Written answers may remain pending until reviewed by the teacher.</li>
-            </ul>
+                </strong>
+            </div>
         </div>
 
-        <div class="card p-3 mb-4">
-            <h5 class="mb-3">Schedule</h5>
-            <p class="mb-2"><strong>Starts:</strong> {{ exam.start_time }}</p>
-            <p class="mb-0"><strong>Ends:</strong> {{ exam.end_time }}</p>
+        <div class="form-section">
+            <div>
+                <h5 class="panel-title mb-3">Exam Rules</h5>
+                <ul class="mb-0 instruction-list">
+                    <li>The exam can only be taken during the scheduled time window.</li>
+                    <li>Once started, the timer continues until submission or timeout.</li>
+                    <li>Allow webcam access before starting so the browser permission popup does not disturb fullscreen mode.</li>
+                    <li>Each correct answer gives {{ exam.correct_marks }} marks.</li>
+                    <li>Each wrong answer gives {{ exam.wrong_marks }} marks.</li>
+                    <li>
+                        {% if exam.has_unlimited_attempts %}
+                        You can retake this exam without any attempt limit.
+                        {% else %}
+                        You can attempt this exam up to {{ exam.max_attempts }} time{{ exam.max_attempts|pluralize }}.
+                        {% endif %}
+                    </li>
+                    <li>Written answers may remain pending until reviewed by the teacher.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="form-section mb-4">
+            <h5 class="panel-title mb-3">Schedule</h5>
+            <div class="activity-list">
+                <div class="activity-item">
+                    <div>
+                        <div class="activity-title">Starts</div>
+                        <div class="activity-meta">Exam opening time</div>
+                    </div>
+                    <div class="activity-title">{{ exam.start_time }}</div>
+                </div>
+                <div class="activity-item">
+                    <div>
+                        <div class="activity-title">Ends</div>
+                        <div class="activity-meta">Final submission deadline</div>
+                    </div>
+                    <div class="activity-title">{{ exam.end_time }}</div>
+                </div>
+            </div>
         </div>
 
         {% if exam.instructions %}
-        <div class="card p-3 mb-4">
-            <h5 class="mb-3">Teacher Instructions</h5>
+        <div class="form-section mb-4">
+            <h5 class="panel-title mb-3">Teacher Instructions</h5>
             <div class="mb-0">{{ exam.instructions|linebreaks }}</div>
         </div>
         {% endif %}
 
-        <form method="post" class="d-flex gap-2 flex-wrap">
+        <div class="alert alert-info" id="webcamStatus">
+            Click Check Webcam before starting the exam.
+        </div>
+        <div class="alert alert-warning d-none" id="webcamHelp">
+            Camera permission is blocked for this site. Click the camera/lock icon in the address bar, allow Camera, then reload this page and click Check Webcam again.
+        </div>
+
+        <form method="post" class="d-flex gap-2 flex-wrap" id="startExamForm">
             {% csrf_token %}
-            <button type="submit" class="btn btn-primary">Start Exam</button>
+            <input type="hidden" name="webcam_warning_count" id="webcamWarningCount" value="0">
+            <button type="button" class="btn btn-outline-primary" id="checkWebcamBtn">Check Webcam</button>
+            <button type="submit" class="btn btn-primary" id="startExamBtn" disabled>Start Exam</button>
             <a href="{% url 'leaderboard' exam.id %}" class="btn btn-outline-dark">View Leaderboard</a>
         </form>
     </div>
 </div>
+
+<style>
+.instruction-list {
+    padding-left: 1.25rem;
+    line-height: 1.7;
+}
+
+.instruction-list li + li {
+    margin-top: 0.4rem;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const checkWebcamBtn = document.getElementById("checkWebcamBtn");
+    const startExamBtn = document.getElementById("startExamBtn");
+    const webcamStatus = document.getElementById("webcamStatus");
+    const webcamHelp = document.getElementById("webcamHelp");
+    const webcamWarningCount = document.getElementById("webcamWarningCount");
+    let webcamChecked = false;
+
+    function setStatus(message, type) {
+        webcamStatus.className = "alert alert-" + type;
+        webcamStatus.textContent = message;
+    }
+
+    function showPermissionHelp(show) {
+        webcamHelp.classList.toggle("d-none", !show);
+    }
+
+    async function checkWebcam() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            webcamChecked = true;
+            webcamWarningCount.value = "1";
+            startExamBtn.disabled = false;
+            setStatus("Webcam is not available in this browser. You may continue.", "warning");
+            return;
+        }
+
+        checkWebcamBtn.disabled = true;
+        setStatus("Checking webcam permission...", "info");
+        showPermissionHelp(false);
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            stream.getTracks().forEach((track) => track.stop());
+            webcamChecked = true;
+            webcamWarningCount.value = "0";
+            startExamBtn.disabled = false;
+            setStatus("Webcam permission granted. You can start the exam.", "success");
+        } catch (error) {
+            webcamChecked = true;
+            webcamWarningCount.value = "1";
+            startExamBtn.disabled = false;
+            if (error && error.name === "NotAllowedError") {
+                setStatus("Camera permission is blocked by the browser. You may continue, but this will be recorded.", "warning");
+                showPermissionHelp(true);
+            } else {
+                setStatus("Webcam could not be opened. You may continue, but this will be recorded.", "warning");
+            }
+        } finally {
+            checkWebcamBtn.disabled = false;
+        }
+    }
+
+    if (checkWebcamBtn) {
+        checkWebcamBtn.addEventListener("click", checkWebcam);
+    }
+
+    document.getElementById("startExamForm").addEventListener("submit", function(event) {
+        if (!webcamChecked) {
+            event.preventDefault();
+            setStatus("Please click Check Webcam before starting.", "danger");
+        }
+    });
+});
+</script>
 
 {% endblock %}

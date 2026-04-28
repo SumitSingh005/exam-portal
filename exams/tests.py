@@ -129,6 +129,32 @@ class ExamWorkflowTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Unlimited attempts')
 
+    def test_exam_instructions_carries_webcam_warning_to_attempt(self):
+        exam = self.create_active_exam()
+        Question.objects.create(
+            exam=exam,
+            question_type='mcq',
+            question_text='2 + 2 = ?',
+            option1='3',
+            option2='4',
+            option3='5',
+            option4='6',
+            correct_option=2,
+        )
+
+        self.client.login(username='student_flow', password='testpass123')
+        response = self.client.post(
+            reverse('exam_instructions', args=[exam.id]),
+            {'webcam_warning_count': '1'},
+        )
+
+        self.assertRedirects(response, reverse('take_exam', args=[exam.id]))
+        response = self.client.get(reverse('take_exam', args=[exam.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.client.session['anti_cheating']['webcam_warning_count'], 1)
+        self.assertIn('Webcam permission denied', self.client.session['anti_cheating']['notes'])
+
     def test_take_exam_creates_result_with_negative_marking(self):
         exam = self.create_active_exam(correct_marks=4.0, wrong_marks=-1.0)
         question = Question.objects.create(
@@ -547,6 +573,48 @@ class ExamWorkflowTests(TestCase):
         self.assertContains(response, 'All four options are required')
         self.assertEqual(Question.objects.filter(exam=exam).count(), 0)
 
+    def test_add_question_ajax_returns_created_question(self):
+        exam = self.create_active_exam()
+        self.client.login(username='teacher_flow', password='testpass123')
+        session = self.client.session
+        session['selected_exam'] = exam.id
+        session.save()
+
+        response = self.client.post(
+            reverse('add_question'),
+            {
+                'question_type': 'mcq',
+                'question': 'Which option is correct?',
+                'option1': 'A',
+                'option2': 'B',
+                'option3': 'C',
+                'option4': 'D',
+                'correct': '1',
+                'action': 'add',
+            },
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['status'], 'success')
+        self.assertEqual(response.json()['question']['text'], 'Which option is correct?')
+        self.assertEqual(Question.objects.filter(exam=exam).count(), 1)
+
+    def test_finish_add_question_without_filled_form_clears_selected_exam(self):
+        exam = self.create_active_exam()
+        self.client.login(username='teacher_flow', password='testpass123')
+        session = self.client.session
+        session['selected_exam'] = exam.id
+        session.save()
+
+        response = self.client.post(
+            reverse('add_question'),
+            {'action': 'finish'},
+        )
+
+        self.assertRedirects(response, reverse('dashboard'))
+        self.assertNotIn('selected_exam', self.client.session)
+
     def test_edit_question_rejects_empty_question_text(self):
         exam = self.create_active_exam()
         question = Question.objects.create(
@@ -611,6 +679,282 @@ class ExamWorkflowTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Draft answer restored')
+
+    def test_take_exam_ajax_next_returns_next_question_without_redirect(self):
+        exam = self.create_active_exam()
+        first_question = Question.objects.create(
+            exam=exam,
+            question_type='mcq',
+            question_text='First?',
+            option1='A',
+            option2='B',
+            option3='C',
+            option4='D',
+            correct_option=1,
+        )
+        second_question = Question.objects.create(
+            exam=exam,
+            question_type='mcq',
+            question_text='Second?',
+            option1='W',
+            option2='X',
+            option3='Y',
+            option4='Z',
+            correct_option=2,
+        )
+
+        self.client.login(username='student_flow', password='testpass123')
+        session = self.client.session
+        session['exam_ready'] = exam.id
+        session['current_exam_id'] = exam.id
+        session['question_ids'] = [first_question.id, second_question.id]
+        session['q_index'] = 0
+        session['answers'] = {}
+        session['option_orders'] = {
+            str(first_question.id): [1, 2, 3, 4],
+            str(second_question.id): [1, 2, 3, 4],
+        }
+        session['anti_cheating'] = {
+            'tab_switch_count': 0,
+            'fullscreen_exit_count': 0,
+            'copy_paste_count': 0,
+            'webcam_warning_count': 0,
+            'auto_submitted': False,
+            'notes': '',
+        }
+        session.save()
+
+        response = self.client.post(
+            reverse('take_exam', args=[exam.id]),
+            {'answer': '1'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['status'], 'success')
+        self.assertEqual(response.json()['question']['text'], 'Second?')
+        self.assertEqual(response.json()['q_index'], 2)
+        self.assertTrue(response.json()['is_final'])
+        self.assertEqual(self.client.session['q_index'], 1)
+        self.assertEqual(self.client.session['answers'][str(first_question.id)], '1')
+
+    def test_take_exam_mark_for_review_allows_blank_answer(self):
+        exam = self.create_active_exam()
+        first_question = Question.objects.create(
+            exam=exam,
+            question_type='mcq',
+            question_text='First?',
+            option1='A',
+            option2='B',
+            option3='C',
+            option4='D',
+            correct_option=1,
+        )
+        second_question = Question.objects.create(
+            exam=exam,
+            question_type='mcq',
+            question_text='Second?',
+            option1='W',
+            option2='X',
+            option3='Y',
+            option4='Z',
+            correct_option=2,
+        )
+
+        self.client.login(username='student_flow', password='testpass123')
+        session = self.client.session
+        session['exam_ready'] = exam.id
+        session['current_exam_id'] = exam.id
+        session['question_ids'] = [first_question.id, second_question.id]
+        session['q_index'] = 0
+        session['answers'] = {}
+        session['marked_question_ids'] = []
+        session['option_orders'] = {
+            str(first_question.id): [1, 2, 3, 4],
+            str(second_question.id): [1, 2, 3, 4],
+        }
+        session['anti_cheating'] = {
+            'tab_switch_count': 0,
+            'fullscreen_exit_count': 0,
+            'copy_paste_count': 0,
+            'webcam_warning_count': 0,
+            'auto_submitted': False,
+            'notes': '',
+        }
+        session.save()
+
+        response = self.client.post(
+            reverse('take_exam', args=[exam.id]),
+            {'action': 'mark_review'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['status'], 'success')
+        self.assertEqual(response.json()['question']['text'], 'Second?')
+        self.assertEqual(self.client.session['q_index'], 1)
+        self.assertEqual(self.client.session['answers'], {})
+        self.assertIn(str(first_question.id), self.client.session['marked_question_ids'])
+
+    def test_take_exam_ajax_previous_returns_saved_answer(self):
+        exam = self.create_active_exam()
+        first_question = Question.objects.create(
+            exam=exam,
+            question_type='mcq',
+            question_text='First?',
+            option1='A',
+            option2='B',
+            option3='C',
+            option4='D',
+            correct_option=1,
+        )
+        second_question = Question.objects.create(
+            exam=exam,
+            question_type='mcq',
+            question_text='Second?',
+            option1='W',
+            option2='X',
+            option3='Y',
+            option4='Z',
+            correct_option=2,
+        )
+
+        self.client.login(username='student_flow', password='testpass123')
+        session = self.client.session
+        session['exam_ready'] = exam.id
+        session['current_exam_id'] = exam.id
+        session['question_ids'] = [first_question.id, second_question.id]
+        session['q_index'] = 1
+        session['answers'] = {str(first_question.id): '1'}
+        session['marked_question_ids'] = []
+        session['option_orders'] = {
+            str(first_question.id): [1, 2, 3, 4],
+            str(second_question.id): [1, 2, 3, 4],
+        }
+        session['anti_cheating'] = {
+            'tab_switch_count': 0,
+            'fullscreen_exit_count': 0,
+            'copy_paste_count': 0,
+            'webcam_warning_count': 0,
+            'auto_submitted': False,
+            'notes': '',
+        }
+        session.save()
+
+        response = self.client.post(
+            reverse('take_exam', args=[exam.id]),
+            {'action': 'previous'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['question']['text'], 'First?')
+        self.assertEqual(response.json()['question']['saved_answer'], '1')
+        self.assertTrue(response.json()['is_first'])
+        self.assertEqual(self.client.session['q_index'], 0)
+
+    def test_take_exam_clear_response_removes_saved_answer_and_mark(self):
+        exam = self.create_active_exam()
+        question = Question.objects.create(
+            exam=exam,
+            question_type='mcq',
+            question_text='First?',
+            option1='A',
+            option2='B',
+            option3='C',
+            option4='D',
+            correct_option=1,
+        )
+
+        self.client.login(username='student_flow', password='testpass123')
+        session = self.client.session
+        session['exam_ready'] = exam.id
+        session['current_exam_id'] = exam.id
+        session['question_ids'] = [question.id]
+        session['q_index'] = 0
+        session['answers'] = {str(question.id): '1'}
+        session['marked_question_ids'] = [str(question.id)]
+        session['option_orders'] = {str(question.id): [1, 2, 3, 4]}
+        session['anti_cheating'] = {
+            'tab_switch_count': 0,
+            'fullscreen_exit_count': 0,
+            'copy_paste_count': 0,
+            'webcam_warning_count': 0,
+            'auto_submitted': False,
+            'notes': '',
+        }
+        session.save()
+
+        response = self.client.post(
+            reverse('take_exam', args=[exam.id]),
+            {'action': 'clear_response'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['question']['saved_answer'], '')
+        self.assertFalse(response.json()['question']['marked_for_review'])
+        self.assertEqual(response.json()['answered_count'], 0)
+        self.assertEqual(response.json()['marked_count'], 0)
+        self.assertEqual(self.client.session['answers'], {})
+        self.assertEqual(self.client.session['marked_question_ids'], [])
+
+    def test_take_exam_ajax_next_handles_deleted_following_question(self):
+        exam = self.create_active_exam()
+        first_question = Question.objects.create(
+            exam=exam,
+            question_type='mcq',
+            question_text='First?',
+            option1='A',
+            option2='B',
+            option3='C',
+            option4='D',
+            correct_option=1,
+        )
+        second_question = Question.objects.create(
+            exam=exam,
+            question_type='mcq',
+            question_text='Second?',
+            option1='W',
+            option2='X',
+            option3='Y',
+            option4='Z',
+            correct_option=2,
+        )
+
+        self.client.login(username='student_flow', password='testpass123')
+        session = self.client.session
+        session['exam_ready'] = exam.id
+        session['current_exam_id'] = exam.id
+        session['question_ids'] = [first_question.id, second_question.id]
+        session['q_index'] = 0
+        session['answers'] = {}
+        session['marked_question_ids'] = []
+        session['option_orders'] = {
+            str(first_question.id): [1, 2, 3, 4],
+            str(second_question.id): [1, 2, 3, 4],
+        }
+        session['anti_cheating'] = {
+            'tab_switch_count': 0,
+            'fullscreen_exit_count': 0,
+            'copy_paste_count': 0,
+            'webcam_warning_count': 0,
+            'auto_submitted': False,
+            'notes': '',
+        }
+        session.save()
+
+        second_question.delete()
+
+        response = self.client.post(
+            reverse('take_exam', args=[exam.id]),
+            {'answer': '1'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['status'], 'complete')
+        self.assertEqual(response.json()['redirect_url'], reverse('take_exam', args=[exam.id]))
 
     @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
     def test_student_signup_sends_welcome_email(self):
