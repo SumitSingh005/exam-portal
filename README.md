@@ -78,6 +78,20 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
+For repeatable deployment environments like Render, prefer:
+
+```powershell
+python manage.py ensure_superuser
+```
+
+Set these environment variables first:
+
+```text
+DJANGO_SUPERUSER_USERNAME
+DJANGO_SUPERUSER_EMAIL
+DJANGO_SUPERUSER_PASSWORD
+```
+
 ### 6. Start development server
 
 ```powershell
@@ -234,6 +248,12 @@ python manage.py migrate
 
 ```powershell
 python manage.py createsuperuser
+```
+
+For Render or any auto-deploy environment, use this instead:
+
+```powershell
+python manage.py ensure_superuser
 ```
 
 ## Future Improvements
