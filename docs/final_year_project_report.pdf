@@ -1,0 +1,1086 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R 7 0 R 9 0 R 11 0 R 13 0 R 15 0 R 17 0 R 19 0 R] /Count 8 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Length 2230 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+/F1 20 Tf
+(ONLINE EXAMINATION SYSTEM) Tj
+0 -24 Td
+/F1 16 Tf
+(Final Year Project Report) Tj
+0 -16 Td
+/F1 10 Tf
+(Submitted in partial fulfillment of the requirements for the final year project.) Tj
+0 -16 Td
+/F1 10 Tf
+() Tj
+0 -16 Td
+/F1 11 Tf
+(Submitted By: Student Name) Tj
+0 -16 Td
+/F1 11 Tf
+(Department: Computer Science / Information Technology) Tj
+0 -16 Td
+/F1 11 Tf
+(Academic Year: 2025-2026) Tj
+0 -16 Td
+/F1 10 Tf
+() Tj
+0 -16 Td
+/F1 11 Tf
+(Project Guide: Faculty Guide Name) Tj
+0 -16 Td
+/F1 11 Tf
+(Institution: Institution Name) Tj
+0 -16 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(Table Of Contents) Tj
+0 -14 Td
+/F1 10 Tf
+(1. Certificate) Tj
+0 -14 Td
+/F1 10 Tf
+(2. Acknowledgement) Tj
+0 -14 Td
+/F1 10 Tf
+(3. Abstract) Tj
+0 -14 Td
+/F1 10 Tf
+(4. Introduction) Tj
+0 -14 Td
+/F1 10 Tf
+(5. Problem Statement) Tj
+0 -14 Td
+/F1 10 Tf
+(6. Objectives) Tj
+0 -14 Td
+/F1 10 Tf
+(7. Scope Of The Project) Tj
+0 -14 Td
+/F1 10 Tf
+(8. Technology Stack) Tj
+0 -14 Td
+/F1 10 Tf
+(9. System Users) Tj
+0 -14 Td
+/F1 10 Tf
+(10. Main Modules) Tj
+0 -14 Td
+/F1 10 Tf
+(11. Functional Requirements) Tj
+0 -14 Td
+/F1 10 Tf
+(12. Non Functional Requirements) Tj
+0 -14 Td
+/F1 10 Tf
+(13. Database Design) Tj
+0 -14 Td
+/F1 10 Tf
+(14. Security And Anti Cheating) Tj
+0 -14 Td
+/F1 10 Tf
+(15. Testing) Tj
+0 -14 Td
+/F1 10 Tf
+(16. Deployment) Tj
+0 -14 Td
+/F1 10 Tf
+(17. Advantages) Tj
+0 -14 Td
+/F1 10 Tf
+(18. Limitations) Tj
+0 -14 Td
+/F1 10 Tf
+(19. Future Scope) Tj
+0 -14 Td
+/F1 10 Tf
+(20. Conclusion) Tj
+0 -16 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(1. Certificate) Tj
+0 -14 Td
+/F1 10 Tf
+(This is to certify that the project titled Online Examination System has been developed as a) Tj
+0 -14 Td
+/F1 10 Tf
+(final year project using Python and Django.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The project demonstrates the design and implementation of a web-based examination platform) Tj
+0 -14 Td
+/F1 10 Tf
+(for students, teachers, and administrators.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The work includes user authentication, exam management, secure exam delivery, result) Tj
+0 -14 Td
+/F1 10 Tf
+(processing, analytics, and deployment support.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+/F1 8 Tf
+0 -24 Td
+(Online Examination System | Page 1 of 8) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 3004 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(2. Acknowledgement) Tj
+0 -14 Td
+/F1 10 Tf
+(I would like to express sincere gratitude to my teachers, mentors, friends, and family for) Tj
+0 -14 Td
+/F1 10 Tf
+(their guidance and encouragement during the development of this project.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Their support helped in understanding the practical requirements of an online examination) Tj
+0 -14 Td
+/F1 10 Tf
+(system and in completing the project successfully.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -10 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(3. Abstract) Tj
+0 -14 Td
+/F1 10 Tf
+(The Online Examination System is a Django-based web application designed to conduct, manage,) Tj
+0 -14 Td
+/F1 10 Tf
+(and evaluate examinations digitally.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The system provides separate interfaces for students, teachers, and administrators. Teachers) Tj
+0 -14 Td
+/F1 10 Tf
+(can create exams, schedule them, add questions, configure marks, and review answers.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Students can register, log in, view available exams, attempt exams, and check results.) Tj
+0 -14 Td
+/F1 10 Tf
+(Administrators can manage users, exams, results, and portal settings.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The project also includes anti-cheating controls, randomized questions, randomized options,) Tj
+0 -14 Td
+/F1 10 Tf
+(negative marking, leaderboards, profile analytics, email support, and deployment-ready) Tj
+0 -14 Td
+/F1 10 Tf
+(configuration.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -10 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(4. Introduction) Tj
+0 -14 Td
+/F1 10 Tf
+(Traditional examination systems require physical classrooms, printed question papers, manual) Tj
+0 -14 Td
+/F1 10 Tf
+(checking, and large administrative effort.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(An online examination system reduces paperwork, saves time, improves result accuracy, and) Tj
+0 -14 Td
+/F1 10 Tf
+(allows exams to be conducted in a controlled digital environment.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(This project provides an end-to-end solution for educational institutions that want to) Tj
+0 -14 Td
+/F1 10 Tf
+(conduct objective and written examinations through a web application.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -10 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(5. Problem Statement) Tj
+0 -14 Td
+/F1 10 Tf
+(Manual examination processes are time-consuming and prone to errors in scheduling,) Tj
+0 -14 Td
+/F1 10 Tf
+(evaluation, result calculation, and record maintenance.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Institutions require a system where teachers can create exams, students can attempt them) Tj
+0 -14 Td
+/F1 10 Tf
+(securely, and results can be generated automatically or reviewed manually when required.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The project aims to solve these problems by creating a centralized online exam portal with) Tj
+/F1 8 Tf
+0 -24 Td
+(Online Examination System | Page 2 of 8) Tj
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Length 2546 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+/F1 10 Tf
+(role-based access and automated workflows.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -10 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(6. Objectives) Tj
+0 -14 Td
+/F1 10 Tf
+(To develop a web-based platform for conducting online examinations.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(To provide separate dashboards for administrators, teachers, and students.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(To allow teachers to create, publish, schedule, and manage exams.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(To support multiple question types including MCQ and written answers.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(To calculate objective results automatically with negative marking support.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(To provide manual review workflow for written answers.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(To include anti-cheating controls such as tab-switch and fullscreen violation tracking.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(To provide reports, leaderboards, and student performance analytics.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(To support deployment using Gunicorn, Whitenoise, and PostgreSQL-ready configuration.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -10 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(7. Scope Of The Project) Tj
+0 -14 Td
+/F1 10 Tf
+(The system can be used by schools, colleges, coaching centers, and training institutes for) Tj
+0 -14 Td
+/F1 10 Tf
+(conducting online tests.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(It supports local development with SQLite and production deployment with PostgreSQL.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The current scope includes exam creation, scheduling, attempt management, result) Tj
+0 -14 Td
+/F1 10 Tf
+(calculation, analytics, and admin management.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The system can be extended in the future with certificate generation, advanced proctoring,) Tj
+0 -14 Td
+/F1 10 Tf
+(SMS notifications, and payment integration if required.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -10 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(8. Technology Stack) Tj
+0 -14 Td
+/F1 10 Tf
+(Backend: Python and Django 5.2.12.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Frontend: HTML, CSS, JavaScript, Bootstrap-style templates, and Chart.js-ready analytics.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Database: SQLite for local development and PostgreSQL support for deployment.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+/F1 8 Tf
+0 -24 Td
+(Online Examination System | Page 3 of 8) Tj
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 8 0 R >>
+endobj
+10 0 obj
+<< /Length 2550 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+/F1 10 Tf
+(Static File Serving: Django staticfiles and Whitenoise.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Deployment: Render-compatible setup using Gunicorn and environment variables.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Email: SMTP support using Gmail App Password or any compatible SMTP provider.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -10 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(9. System Users) Tj
+0 -14 Td
+/F1 10 Tf
+(Administrator: Manages users, exams, results, portal settings, and overall system data.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Teacher: Creates exams, manages questions, reviews written answers, and views exam reports.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Student: Registers, logs in, attempts exams, views results, leaderboards, and profile) Tj
+0 -14 Td
+/F1 10 Tf
+(analytics.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -10 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(10. Main Modules) Tj
+0 -14 Td
+/F1 10 Tf
+(Authentication Module: Handles login, registration, password reset, account roles, and) Tj
+0 -14 Td
+/F1 10 Tf
+(student ID support.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Exam Management Module: Allows teachers to create, edit, publish, schedule, and delete) Tj
+0 -14 Td
+/F1 10 Tf
+(exams.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Question Management Module: Supports MCQ and written questions with answer options and) Tj
+0 -14 Td
+/F1 10 Tf
+(correct answer configuration.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Exam Attempt Module: Provides exam instructions, timer, question navigation, answer saving,) Tj
+0 -14 Td
+/F1 10 Tf
+(and submission.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Evaluation Module: Calculates MCQ scores automatically and supports manual review for) Tj
+0 -14 Td
+/F1 10 Tf
+(written answers.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Analytics Module: Shows teacher reports, student performance, leaderboards, average scores,) Tj
+0 -14 Td
+/F1 10 Tf
+(and weak question analysis.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Admin Module: Provides administrative control over users, exams, results, and portal) Tj
+0 -14 Td
+/F1 10 Tf
+(settings.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Notification Module: Supports email-based password reset and notification workflows.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -10 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(11. Functional Requirements) Tj
+0 -14 Td
+/F1 10 Tf
+(The system shall allow student and teacher registration.) Tj
+/F1 8 Tf
+0 -24 Td
+(Online Examination System | Page 4 of 8) Tj
+ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 10 0 R >>
+endobj
+12 0 obj
+<< /Length 2628 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The system shall allow users to log in according to their assigned role.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The system shall allow teachers to create and manage exams.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The system shall allow teachers to add, edit, and delete questions.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The system shall allow students to attempt active and published exams.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The system shall prevent students from attempting expired or unpublished exams.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The system shall calculate scores, percentages, and pass or fail status.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The system shall allow teachers to review written answers and update results.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The system shall display leaderboards and result history.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The system shall allow administrators to manage system data through Django admin.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -10 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(12. Non Functional Requirements) Tj
+0 -14 Td
+/F1 10 Tf
+(Security: The system uses authentication, role-based access, CSRF protection, password) Tj
+0 -14 Td
+/F1 10 Tf
+(validation, and secure deployment settings.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Reliability: The system validates exam availability, attempt limits, and result states to) Tj
+0 -14 Td
+/F1 10 Tf
+(reduce incorrect submissions.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Usability: The application provides simple dashboards and clear workflows for each role.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Maintainability: The project follows Django app structure with separate accounts and exams) Tj
+0 -14 Td
+/F1 10 Tf
+(modules.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Scalability: PostgreSQL and deployment-ready settings allow the project to be hosted in a) Tj
+0 -14 Td
+/F1 10 Tf
+(production environment.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -10 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(13. Database Design) Tj
+0 -14 Td
+/F1 10 Tf
+(The database stores users, roles, exams, questions, result records, answer records, and) Tj
+0 -14 Td
+/F1 10 Tf
+(portal settings.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The custom user model supports account roles and student ID information.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The exam model stores scheduling, marking rules, instructions, publication status, and) Tj
+/F1 8 Tf
+0 -24 Td
+(Online Examination System | Page 5 of 8) Tj
+ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 12 0 R >>
+endobj
+14 0 obj
+<< /Length 2632 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+/F1 10 Tf
+(attempt limits.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The question model stores MCQ and written question details.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The result and result answer models store submitted answers, awarded marks, review status,) Tj
+0 -14 Td
+/F1 10 Tf
+(and anti-cheating information.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -10 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(14. Security And Anti Cheating) Tj
+0 -14 Td
+/F1 10 Tf
+(The project includes failed login attempt tracking and temporary account lockout support.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(During exams, the system can track fullscreen exits, tab switches, copy-paste actions,) Tj
+0 -14 Td
+/F1 10 Tf
+(webcam warnings, and automatic submissions.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(These details are stored with the result so that teachers can review suspicious activity.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The deployed application can use HTTPS, secure cookies, CSRF protection, and environment-) Tj
+0 -14 Td
+/F1 10 Tf
+(based secret configuration.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -10 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(15. Testing) Tj
+0 -14 Td
+/F1 10 Tf
+(The project includes Django tests for authentication, exam workflows, result processing, and) Tj
+0 -14 Td
+/F1 10 Tf
+(email-related behavior.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Testing verifies that students can attempt exams, teachers can manage exams, and results are) Tj
+0 -14 Td
+/F1 10 Tf
+(calculated correctly.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Additional manual testing was performed for login, registration, exam creation, exam) Tj
+0 -14 Td
+/F1 10 Tf
+(attempt, result viewing, and admin workflows.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -10 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(16. Deployment) Tj
+0 -14 Td
+/F1 10 Tf
+(The project is prepared for deployment on Render using Gunicorn as the application server.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Whitenoise is used for serving static files in production.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Environment variables are used for secret key, debug mode, allowed hosts, database URL,) Tj
+0 -14 Td
+/F1 10 Tf
+(email credentials, and password reset domain.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(PostgreSQL can be connected using the DATABASE_URL environment variable.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The project includes a custom ensure_superuser command for creating or updating an admin) Tj
+0 -14 Td
+/F1 10 Tf
+(user during deployment.) Tj
+/F1 8 Tf
+0 -24 Td
+(Online Examination System | Page 6 of 8) Tj
+ET
+endstream
+endobj
+15 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 14 0 R >>
+endobj
+16 0 obj
+<< /Length 2063 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+/F1 10 Tf
+() Tj
+0 -10 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(17. Advantages) Tj
+0 -14 Td
+/F1 10 Tf
+(Reduces paper usage and manual checking effort.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Provides fast result generation for objective questions.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Supports flexible exam scheduling and attempt limits.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Improves transparency through reports and leaderboards.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Provides role-based workflows for students, teachers, and administrators.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Can be hosted online and accessed from different locations.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -10 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(18. Limitations) Tj
+0 -14 Td
+/F1 10 Tf
+(Advanced live proctoring is not fully implemented.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Internet connectivity is required for online use.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Subjective answers still require manual review by teachers.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The system depends on correct environment configuration for production email and database) Tj
+0 -14 Td
+/F1 10 Tf
+(services.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -10 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(19. Future Scope) Tj
+0 -14 Td
+/F1 10 Tf
+(Certificate generation for passed students.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Advanced webcam-based proctoring and face detection.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(SMS or WhatsApp notifications.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Question bank import from Excel or CSV files.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Detailed subject-wise analytics.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Payment integration for paid examinations or courses.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Mobile application support.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -10 Td
+/F1 10 Tf
+() Tj
+/F1 8 Tf
+0 -24 Td
+(Online Examination System | Page 7 of 8) Tj
+ET
+endstream
+endobj
+17 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 16 0 R >>
+endobj
+18 0 obj
+<< /Length 747 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+/F1 14 Tf
+(20. Conclusion) Tj
+0 -14 Td
+/F1 10 Tf
+(The Online Examination System successfully provides a complete platform for managing digital) Tj
+0 -14 Td
+/F1 10 Tf
+(examinations.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(It reduces manual effort, improves result accuracy, and provides useful dashboards for) Tj
+0 -14 Td
+/F1 10 Tf
+(students, teachers, and administrators.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The project demonstrates practical use of Django, database design, role-based access, result) Tj
+0 -14 Td
+/F1 10 Tf
+(processing, security controls, and deployment configuration.) Tj
+0 -8 Td
+/F1 10 Tf
+() Tj
+0 -10 Td
+/F1 10 Tf
+() Tj
+/F1 8 Tf
+0 -24 Td
+(Online Examination System | Page 8 of 8) Tj
+ET
+endstream
+endobj
+19 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 18 0 R >>
+endobj
+xref
+0 20
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000168 00000 n 
+0000000238 00000 n 
+0000002520 00000 n 
+0000002646 00000 n 
+0000005702 00000 n 
+0000005828 00000 n 
+0000008426 00000 n 
+0000008552 00000 n 
+0000011155 00000 n 
+0000011283 00000 n 
+0000013964 00000 n 
+0000014092 00000 n 
+0000016777 00000 n 
+0000016905 00000 n 
+0000019021 00000 n 
+0000019149 00000 n 
+0000019948 00000 n 
+trailer
+<< /Size 20 /Root 1 0 R >>
+startxref
+20076
+%%EOF
