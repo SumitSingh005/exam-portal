@@ -60,6 +60,81 @@
         </div>
     </div>
 
+    <div class="student-focus-panel mb-4">
+        <div class="student-focus-main">
+            <div class="quick-chip mb-3"><i class="bi bi-stars"></i> Next Best Action</div>
+            {% if recommended_exam %}
+                <h3>{{ recommended_exam.title }}</h3>
+                <p class="panel-subtitle">
+                    {% if recommended_exam.is_active %}
+                    This exam is live now. Open the instructions when you are ready.
+                    {% else %}
+                    Scheduled for {{ recommended_exam.start_time|date:"M d, Y H:i" }}. Keep it on your radar.
+                    {% endif %}
+                </p>
+                <div class="student-focus-actions">
+                    {% if recommended_exam.is_active %}
+                    <a href="{% url 'exam_instructions' recommended_exam.id %}" class="btn btn-primary">Start Prep</a>
+                    {% else %}
+                    <a href="{% url 'exam_list' %}" class="btn btn-primary">View Schedule</a>
+                    {% endif %}
+                    <a href="{% url 'leaderboard' recommended_exam.id %}" class="btn btn-outline-dark">Leaderboard</a>
+                </div>
+            {% else %}
+                <h3>No pending exam right now</h3>
+                <p class="panel-subtitle">You are clear for the moment. Review your results or check back when a teacher publishes a new exam.</p>
+                <div class="student-focus-actions">
+                    <a href="{% url 'exam_list' %}" class="btn btn-primary">Browse Exams</a>
+                    <a href="{% url 'result_history' %}" class="btn btn-outline-dark">Result History</a>
+                </div>
+            {% endif %}
+        </div>
+        <div class="student-focus-side">
+            <div class="student-focus-metric">
+                <span class="muted-label">Live Exams</span>
+                <strong>{{ active_exam_count }}</strong>
+            </div>
+            <div class="student-focus-metric">
+                <span class="muted-label">Upcoming</span>
+                <strong>{{ upcoming_exam_count }}</strong>
+            </div>
+            <div class="student-focus-metric student-focus-wide">
+                <span class="muted-label">Pass Rate</span>
+                <strong>{{ completion_rate }}%</strong>
+            </div>
+            <p class="student-readiness-note">{{ readiness_message }}</p>
+        </div>
+    </div>
+
+    <div class="ai-coach-panel mb-4">
+        <div class="ai-coach-header">
+            <div>
+                <div class="quick-chip mb-3"><i class="bi bi-cpu-fill"></i> AI Study Coach</div>
+                <h3>{{ ai_coach.status }}</h3>
+                <p class="panel-subtitle">{{ ai_coach.summary }}</p>
+            </div>
+            <div class="ai-risk-badge">{{ ai_coach.risk_label }}</div>
+        </div>
+        <div class="ai-coach-grid">
+            <div class="ai-coach-card">
+                <div class="muted-label mb-3">Focus Points</div>
+                <div class="ai-coach-list">
+                    {% for point in ai_coach.focus_points %}
+                    <div class="ai-coach-item"><i class="bi bi-check2-circle"></i><span>{{ point }}</span></div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="ai-coach-card">
+                <div class="muted-label mb-3">Recommended Actions</div>
+                <div class="ai-coach-list">
+                    {% for item in ai_coach.action_items %}
+                    <div class="ai-coach-item"><i class="bi bi-arrow-right-circle"></i><span>{{ item }}</span></div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-4">
         <div class="col-xl-7">
             <div class="card p-4 h-100">
@@ -82,7 +157,7 @@
                                 {% if exam.has_unlimited_attempts %}Unlimited{% else %}{{ exam.max_attempts }}{% endif %}
                             </div>
                             <div class="small mt-2">
-                                <span class="badge {% if exam.has_unlimited_attempts or exam.remaining_attempts %}bg-info text-dark{% else %}bg-danger{% endif %}">
+                                <span class="badge attempt-status-badge {% if exam.has_unlimited_attempts or exam.remaining_attempts %}bg-info text-dark{% else %}bg-danger{% endif %}">
                                     {% if exam.has_unlimited_attempts %}
                                     Attempts left: Unlimited
                                     {% else %}

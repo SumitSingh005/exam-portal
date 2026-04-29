@@ -62,14 +62,14 @@
                             <div class="activity-meta">Correct: +{{ exam.correct_marks }} | Wrong: {{ exam.wrong_marks }}</div>
                         </div>
                     </div>
-                    <div class="activity-item">
+                    <div class="activity-item exam-attempt-summary">
                         <div>
                             <div class="activity-title">Attempts Allowed</div>
                             <div class="activity-meta">{% if exam.has_unlimited_attempts %}Unlimited{% else %}{{ exam.max_attempts }}{% endif %}</div>
                         </div>
                         {% if user.is_student %}
-                        <div>
-                            <span class="badge {% if exam.has_unlimited_attempts or exam.remaining_attempts %}bg-info text-dark{% else %}bg-danger{% endif %}">
+                        <div class="exam-attempt-badge">
+                            <span class="badge attempt-status-badge {% if exam.has_unlimited_attempts or exam.remaining_attempts %}bg-info text-dark{% else %}bg-danger{% endif %}">
                                 {% if exam.has_unlimited_attempts %}
                                 Attempts left: Unlimited
                                 {% else %}

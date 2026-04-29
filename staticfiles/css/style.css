@@ -168,11 +168,22 @@ body {
 .input-group-text {
     display: flex;
     align-items: center;
+    justify-content: center;
+    min-width: 48px;
     padding: 0.75rem 0.95rem;
     color: var(--text);
     background: var(--surface-muted);
     border: 1px solid var(--border);
     border-radius: 16px;
+}
+
+.input-icon {
+    width: 20px;
+    height: 20px;
+    display: block;
+    object-fit: contain;
+    fill: currentColor;
+    color: #7a7f87;
 }
 
 @media (min-width: 768px) {
@@ -222,24 +233,28 @@ a {
 .btn-primary {
     background: var(--accent);
     border-color: var(--accent);
+    color: #fff;
 }
 
 .btn-primary:hover,
 .btn-primary:focus {
     background: var(--accent-strong);
     border-color: var(--accent-strong);
+    color: #fff;
     box-shadow: 0 10px 24px rgba(19, 111, 99, 0.25);
 }
 
 .btn-success {
     background: var(--secondary);
     border-color: var(--secondary);
+    color: #fff;
 }
 
 .btn-success:hover,
 .btn-success:focus {
     background: #aa5d30;
     border-color: #aa5d30;
+    color: #fff;
 }
 
 .btn-outline-dark {
@@ -471,6 +486,28 @@ a {
     flex-wrap: wrap;
 }
 
+.exam-attempt-summary {
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.exam-attempt-summary > div:first-child {
+    min-width: 0;
+}
+
+.exam-attempt-badge {
+    display: flex;
+    justify-content: flex-start;
+    min-width: 0;
+}
+
+.attempt-status-badge {
+    max-width: 100%;
+    white-space: normal;
+    line-height: 1.25;
+    text-align: left;
+}
+
 .table {
     color: var(--text);
 }
@@ -637,6 +674,149 @@ textarea.form-control {
     margin-top: 0.2rem;
 }
 
+.student-focus-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
+    gap: 1rem;
+    align-items: stretch;
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background:
+        linear-gradient(135deg, rgba(19, 111, 99, 0.1), rgba(194, 109, 58, 0.1)),
+        var(--surface);
+    box-shadow: var(--shadow-soft);
+}
+
+.student-focus-main,
+.student-focus-side {
+    min-width: 0;
+}
+
+.student-focus-main {
+    padding: 0.5rem;
+}
+
+.student-focus-main h3 {
+    margin: 0 0 0.45rem;
+    font-size: clamp(1.45rem, 2vw, 2rem);
+    font-weight: 900;
+}
+
+.student-focus-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.2rem;
+}
+
+.student-focus-side {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.student-focus-metric,
+.student-readiness-note {
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    background: var(--surface-strong);
+    padding: 1rem;
+}
+
+.student-focus-metric strong {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 1.6rem;
+    line-height: 1;
+}
+
+.student-focus-wide,
+.student-readiness-note {
+    grid-column: 1 / -1;
+}
+
+.student-readiness-note {
+    margin: 0;
+    color: var(--text-soft);
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.ai-coach-panel {
+    padding: 1.35rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background:
+        linear-gradient(135deg, rgba(37, 99, 235, 0.09), rgba(19, 111, 99, 0.11)),
+        var(--surface);
+    box-shadow: var(--shadow-soft);
+}
+
+.ai-coach-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.ai-coach-header h3 {
+    margin: 0 0 0.45rem;
+    font-size: clamp(1.35rem, 2vw, 1.9rem);
+    font-weight: 900;
+}
+
+.ai-risk-badge {
+    flex: 0 0 auto;
+    padding: 0.65rem 0.9rem;
+    border-radius: 999px;
+    background: var(--surface-strong);
+    border: 1px solid var(--border);
+    color: var(--accent-strong);
+    font-weight: 900;
+}
+
+.ai-coach-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.ai-coach-card {
+    min-width: 0;
+    padding: 1rem;
+    border-radius: 22px;
+    background: var(--surface-strong);
+    border: 1px solid var(--border);
+}
+
+.ai-coach-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.ai-coach-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.65rem;
+    align-items: start;
+    color: var(--text);
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+.ai-coach-item i {
+    color: var(--accent);
+    margin-top: 0.1rem;
+}
+
+.teacher-ai-panel {
+    background:
+        linear-gradient(135deg, rgba(194, 109, 58, 0.1), rgba(37, 99, 235, 0.08)),
+        var(--surface);
+}
+
 .muted-label {
     color: var(--text-soft);
     font-size: 0.85rem;
@@ -759,6 +939,23 @@ body {
     box-shadow: 0 12px 22px rgba(19, 111, 99, 0.2);
 }
 
+.brand-logo {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    display: block;
+    border-radius: 14px;
+    background: #fffdf8;
+    box-shadow: 0 12px 22px rgba(19, 111, 99, 0.22);
+}
+
+.brand-logo-lg {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
+    border-radius: 16px;
+}
+
 .app-navbar {
     min-height: 74px;
     padding-inline: clamp(1rem, 2vw, 1.6rem) !important;
@@ -779,6 +976,12 @@ body {
     color: #fff;
     background: rgba(255, 255, 255, 0.08);
     cursor: pointer;
+}
+
+.nav-action-icon {
+    width: 22px;
+    height: 22px;
+    display: block;
 }
 
 .user-pill {
@@ -1104,6 +1307,272 @@ body {
     border-radius: 28px !important;
 }
 
+.auth-card-brand {
+    display: grid;
+    justify-items: center;
+    gap: 0.85rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.auth-card-brand h3 {
+    margin: 0;
+    font-weight: 800;
+}
+
+.auth-page-logo {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1rem;
+    border-radius: 20px;
+}
+
+/* Teacher dashboard */
+.teacher-hero {
+    background:
+        linear-gradient(135deg, rgba(19, 111, 99, 0.18), rgba(194, 109, 58, 0.16)),
+        var(--surface-strong);
+}
+
+.teacher-hero-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-top: 1.4rem;
+}
+
+.teacher-hero-strip span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.65rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.52);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-weight: 800;
+}
+
+body.theme-dark .teacher-hero-strip span {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.teacher-metric-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.teacher-metric-grid > [class*="col-"] {
+    width: 100%;
+    max-width: 100%;
+}
+
+.teacher-stat {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    min-height: 168px;
+    width: 100%;
+}
+
+.teacher-stat::after {
+    display: none;
+}
+
+.teacher-stat-icon,
+.teacher-section-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    border-radius: 16px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+    box-shadow: 0 12px 24px rgba(19, 111, 99, 0.22);
+}
+
+.teacher-stat-icon-alt,
+.teacher-section-icon-alt {
+    background: linear-gradient(135deg, #2563eb, var(--accent));
+}
+
+.teacher-stat-icon-warn,
+.teacher-section-icon-warn {
+    background: linear-gradient(135deg, var(--secondary), #b45309);
+}
+
+.teacher-stat-note {
+    color: var(--text-soft);
+    font-weight: 700;
+    margin-top: 0.35rem;
+}
+
+.teacher-stat-warning {
+    border-color: rgba(194, 109, 58, 0.28);
+}
+
+.teacher-insight-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.teacher-insight {
+    padding: 1.15rem 1.25rem;
+    border-radius: 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-soft);
+}
+
+.teacher-insight-label {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--text-soft);
+    font-size: 0.86rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.teacher-insight strong {
+    display: block;
+    margin-top: 0.45rem;
+    font-size: 1.45rem;
+}
+
+.teacher-card-heading {
+    display: flex;
+    gap: 0.9rem;
+    align-items: center;
+    margin-bottom: 1.2rem;
+}
+
+.teacher-winner {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 1rem;
+    border-radius: 22px;
+    background: var(--surface-strong);
+    border: 1px solid var(--border);
+}
+
+.teacher-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    font-weight: 900;
+    font-size: 1.2rem;
+}
+
+.teacher-score-badge {
+    text-align: right;
+    padding: 0.6rem 0.8rem;
+    border-radius: 16px;
+    background: var(--warning-soft);
+}
+
+.teacher-action-list,
+.teacher-exam-list {
+    display: grid;
+    gap: 0.9rem;
+}
+
+.teacher-action-link {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 1rem;
+    border-radius: 22px;
+    background: var(--surface-strong);
+    border: 1px solid var(--border);
+    color: var(--text);
+}
+
+.teacher-action-link:hover {
+    color: var(--text);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.teacher-action-arrow {
+    font-size: 1.6rem;
+    color: var(--accent);
+}
+
+.teacher-exam-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem 1.1rem;
+    border-radius: 22px;
+    background: var(--surface-strong);
+    border: 1px solid var(--border);
+}
+
+.teacher-exam-title {
+    font-weight: 900;
+    margin-bottom: 0.25rem;
+}
+
+.teacher-exam-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.teacher-progress {
+    height: 8px;
+    margin-top: 0.75rem;
+    border-radius: 999px;
+    background: var(--surface-muted);
+    overflow: hidden;
+}
+
+.teacher-progress span {
+    display: block;
+    height: 100%;
+    max-width: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--accent), var(--secondary));
+}
+
+.teacher-empty-state {
+    display: grid;
+    justify-items: center;
+    gap: 0.7rem;
+    padding: 2rem 1rem;
+    border-radius: 22px;
+    background: var(--surface-strong);
+    border: 1px dashed var(--border);
+    color: var(--text-soft);
+    text-align: center;
+}
+
+.teacher-empty-state i {
+    font-size: 2rem;
+    color: var(--accent);
+}
+
+.teacher-empty-state p {
+    margin: 0;
+    font-weight: 700;
+}
+
 @media (min-width: 1200px) {
     .col-xl-5 {
         flex: 0 0 auto;
@@ -1149,6 +1618,27 @@ body {
     .auth-highlights {
         justify-items: center;
     }
+
+    .teacher-metric-grid,
+    .teacher-insight-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .student-focus-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .ai-coach-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .teacher-exam-row {
+        grid-template-columns: 1fr;
+    }
+
+    .teacher-exam-pills {
+        justify-content: flex-start;
+    }
 }
 
 @media (max-width: 767.98px) {
@@ -1163,6 +1653,12 @@ body {
     .app-brand span:last-child,
     .user-pill span {
         display: none;
+    }
+
+    .brand-logo {
+        width: 40px;
+        height: 40px;
+        flex-basis: 40px;
     }
 
     .hero {
@@ -1187,5 +1683,41 @@ body {
     .dashboard-actions,
     .dashboard-actions .btn {
         width: 100%;
+    }
+
+    .student-focus-actions .btn {
+        width: 100%;
+    }
+
+    .student-focus-side {
+        grid-template-columns: 1fr;
+    }
+
+    .ai-coach-header {
+        display: grid;
+    }
+
+    .ai-risk-badge {
+        justify-self: start;
+    }
+
+    .teacher-metric-grid,
+    .teacher-insight-strip {
+        grid-template-columns: 1fr;
+    }
+
+    .teacher-hero-strip span,
+    .teacher-action-link,
+    .teacher-winner {
+        width: 100%;
+    }
+
+    .teacher-winner {
+        grid-template-columns: auto 1fr;
+    }
+
+    .teacher-score-badge {
+        grid-column: 1 / -1;
+        text-align: left;
     }
 }

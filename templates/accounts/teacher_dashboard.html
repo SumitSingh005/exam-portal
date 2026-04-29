@@ -3,80 +3,139 @@
 {% block content %}
 
 <div class="container-fluid">
-    <div class="dashboard-hero">
+    <div class="dashboard-hero teacher-hero">
         <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
             <div>
                 <div class="quick-chip mb-3"><i class="bi bi-person-workspace"></i> Teacher Workspace</div>
-                <h2>Teaching Dashboard</h2>
+                <h2>Welcome back, {{ user.username }}</h2>
                 <p class="panel-subtitle">Monitor activity, review pending answers, and manage upcoming exams from a cleaner control panel.</p>
             </div>
             <div class="dashboard-actions">
-                <a href="{% url 'create_exam' %}" class="btn btn-primary">Create Exam</a>
-                <a href="{% url 'teacher_exam_list' %}" class="btn btn-outline-dark">Manage Exams</a>
+                <a href="{% url 'create_exam' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Create Exam</a>
+                <a href="{% url 'teacher_exam_list' %}" class="btn btn-outline-dark"><i class="bi bi-kanban"></i> Manage Exams</a>
+            </div>
+        </div>
+        <div class="teacher-hero-strip">
+            <span><i class="bi bi-clipboard2-check"></i> {{ total_exams }} exams</span>
+            <span><i class="bi bi-people"></i> {{ students_attempted }} students attempted</span>
+            <span><i class="bi bi-hourglass-split"></i> {{ pending_reviews }} pending reviews</span>
+        </div>
+    </div>
+
+    <div class="teacher-metric-grid mb-4">
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card teacher-stat h-100">
+                <div class="teacher-stat-icon"><i class="bi bi-journal-text"></i></div>
+                <div>
+                    <div class="stat-label">Total Exams</div>
+                    <p class="stat-value">{{ total_exams }}</p>
+                    <div class="teacher-stat-note">Created by you</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card teacher-stat h-100">
+                <div class="teacher-stat-icon teacher-stat-icon-alt"><i class="bi bi-patch-question"></i></div>
+                <div>
+                    <div class="stat-label">Questions Bank</div>
+                    <p class="stat-value">{{ total_questions }}</p>
+                    <div class="teacher-stat-note">MCQ and written</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card teacher-stat h-100">
+                <div class="teacher-stat-icon"><i class="bi bi-person-check"></i></div>
+                <div>
+                    <div class="stat-label">Students Attempted</div>
+                    <p class="stat-value">{{ students_attempted }}</p>
+                    <div class="teacher-stat-note">Unique learners</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="stat-card teacher-stat h-100 teacher-stat-warning">
+                <div class="teacher-stat-icon teacher-stat-icon-warn"><i class="bi bi-pencil-square"></i></div>
+                <div>
+                    <div class="stat-label">Pending Reviews</div>
+                    <p class="stat-value">{{ pending_reviews }}</p>
+                    <div class="teacher-stat-note">Written answers</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-md-6 col-xl-3">
-            <div class="stat-card h-100">
-                <div class="stat-label">Total Exams</div>
-                <p class="stat-value">{{ total_exams }}</p>
-            </div>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <div class="stat-card h-100">
-                <div class="stat-label">Questions Bank</div>
-                <p class="stat-value">{{ total_questions }}</p>
-            </div>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <div class="stat-card h-100">
-                <div class="stat-label">Students Attempted</div>
-                <p class="stat-value">{{ students_attempted }}</p>
-            </div>
-        </div>
-        <div class="col-md-6 col-xl-3">
-            <div class="stat-card h-100">
-                <div class="stat-label">Pending Reviews</div>
-                <p class="stat-value">{{ pending_reviews }}</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="summary-strip mb-4">
-        <div class="summary-pill">
-            <span class="muted-label">Average Marks</span>
+    <div class="teacher-insight-strip mb-4">
+        <div class="teacher-insight">
+            <div class="teacher-insight-label"><i class="bi bi-bar-chart-line"></i> Average Marks</div>
             <strong>{{ average_marks }}</strong>
         </div>
-        <div class="summary-pill">
-            <span class="muted-label">Average Percentage</span>
+        <div class="teacher-insight">
+            <div class="teacher-insight-label"><i class="bi bi-percent"></i> Average Percentage</div>
             <strong>{{ average_percentage }}%</strong>
         </div>
-        <div class="summary-pill">
-            <span class="muted-label">Top Performer</span>
+        <div class="teacher-insight">
+            <div class="teacher-insight-label"><i class="bi bi-trophy"></i> Top Performer</div>
             <strong>{% if topper %}{{ topper.student.username }}{% else %}-{% endif %}</strong>
+        </div>
+    </div>
+
+    <div class="ai-coach-panel teacher-ai-panel mb-4">
+        <div class="ai-coach-header">
+            <div>
+                <div class="quick-chip mb-3"><i class="bi bi-cpu-fill"></i> AI Teaching Assistant</div>
+                <h3>{{ teacher_ai_assistant.status }}</h3>
+                <p class="panel-subtitle">{{ teacher_ai_assistant.summary }}</p>
+            </div>
+            <div class="ai-risk-badge">{{ teacher_ai_assistant.risk_label }}</div>
+        </div>
+        <div class="ai-coach-grid">
+            <div class="ai-coach-card">
+                <div class="muted-label mb-3">Class Signals</div>
+                <div class="ai-coach-list">
+                    {% for point in teacher_ai_assistant.focus_points %}
+                    <div class="ai-coach-item"><i class="bi bi-graph-up"></i><span>{{ point }}</span></div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="ai-coach-card">
+                <div class="muted-label mb-3">Recommended Actions</div>
+                <div class="ai-coach-list">
+                    {% for item in teacher_ai_assistant.action_items %}
+                    <div class="ai-coach-item"><i class="bi bi-arrow-right-circle"></i><span>{{ item }}</span></div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="row g-4 mb-4">
         <div class="col-xl-4">
-            <div class="card p-4 h-100">
-                <h5 class="panel-title">Top Performer</h5>
-                <p class="panel-subtitle mb-3">Best finalized result across your exams.</p>
+            <div class="card p-4 h-100 teacher-spotlight">
+                <div class="teacher-card-heading">
+                    <span class="teacher-section-icon"><i class="bi bi-award"></i></span>
+                    <div>
+                        <h5 class="panel-title">Top Performer</h5>
+                        <p class="panel-subtitle mb-0">Best finalized result across your exams.</p>
+                    </div>
+                </div>
                 {% if topper %}
-                <div class="activity-item">
+                <div class="teacher-winner">
+                    <div class="teacher-avatar">{{ topper.student.username|first|upper }}</div>
                     <div>
                         <div class="activity-title">{{ topper.student.username }}</div>
                         <div class="activity-meta">{{ topper.exam.title }}</div>
                     </div>
-                    <div class="text-end">
+                    <div class="teacher-score-badge">
                         <div class="activity-title">{{ topper.score }}/{{ topper.max_marks }}</div>
                         <div class="activity-meta">{{ topper.percentage }}%</div>
                     </div>
                 </div>
                 {% else %}
-                <p class="text-muted mb-0">No attempts yet.</p>
+                <div class="teacher-empty-state">
+                    <i class="bi bi-award"></i>
+                    <p>No attempts yet.</p>
+                </div>
                 {% endif %}
             </div>
         </div>
@@ -85,7 +144,7 @@
             <div class="card p-4 h-100">
                 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                     <div>
-                        <h5 class="panel-title mb-0">Exam Activity Overview</h5>
+                        <h5 class="panel-title mb-0"><i class="bi bi-graph-up-arrow"></i> Exam Activity Overview</h5>
                         <p class="panel-subtitle">Attempts and pending reviews across your latest exams.</p>
                     </div>
                 </div>
@@ -99,36 +158,33 @@
     <div class="row g-4">
         <div class="col-xl-4">
             <div class="card p-4 h-100">
-                <h5 class="panel-title">Quick Actions</h5>
+                <h5 class="panel-title"><i class="bi bi-lightning-charge"></i> Quick Actions</h5>
                 <p class="panel-subtitle mb-3">Jump into your most common tasks.</p>
-                <div class="activity-list">
-                    <div class="activity-item">
+                <div class="teacher-action-list">
+                    <a href="{% url 'create_exam' %}" class="teacher-action-link">
+                        <span class="teacher-section-icon"><i class="bi bi-plus-lg"></i></span>
                         <div>
                             <div class="activity-title">Create a new exam</div>
                             <div class="activity-meta">Set schedule, rules, and attempts.</div>
                         </div>
-                        <div class="activity-actions">
-                            <a href="{% url 'create_exam' %}" class="btn btn-primary btn-sm">Create</a>
-                        </div>
-                    </div>
-                    <div class="activity-item">
+                        <i class="bi bi-arrow-right-short teacher-action-arrow"></i>
+                    </a>
+                    <a href="{% url 'add_question' %}" class="teacher-action-link">
+                        <span class="teacher-section-icon teacher-section-icon-alt"><i class="bi bi-patch-plus"></i></span>
                         <div>
                             <div class="activity-title">Add questions</div>
                             <div class="activity-meta">Build MCQ and written exams faster.</div>
                         </div>
-                        <div class="activity-actions">
-                            <a href="{% url 'add_question' %}" class="btn btn-outline-dark btn-sm">Add</a>
-                        </div>
-                    </div>
-                    <div class="activity-item">
+                        <i class="bi bi-arrow-right-short teacher-action-arrow"></i>
+                    </a>
+                    <a href="{% url 'teacher_exam_list' %}" class="teacher-action-link">
+                        <span class="teacher-section-icon teacher-section-icon-warn"><i class="bi bi-file-earmark-bar-graph"></i></span>
                         <div>
                             <div class="activity-title">Review exam reports</div>
                             <div class="activity-meta">Export results and review submissions.</div>
                         </div>
-                        <div class="activity-actions">
-                            <a href="{% url 'teacher_exam_list' %}" class="btn btn-outline-dark btn-sm">Open</a>
-                        </div>
-                    </div>
+                        <i class="bi bi-arrow-right-short teacher-action-arrow"></i>
+                    </a>
                 </div>
             </div>
         </div>
@@ -142,25 +198,34 @@
                     </div>
                 </div>
 
-                {% for item in exam_analytics %}
-                <div class="activity-item mb-3">
-                    <div>
-                        <div class="activity-title">{{ item.exam.title }}</div>
-                        <div class="activity-meta">
-                            Marking: +{{ item.exam.correct_marks }} / {{ item.exam.wrong_marks }} |
-                            Avg: {{ item.average_percentage }}% |
-                            Top Score: {{ item.top_score }}
+                <div class="teacher-exam-list">
+                    {% for item in exam_analytics %}
+                    <div class="teacher-exam-row">
+                        <div class="teacher-exam-main">
+                            <div class="teacher-exam-title">{{ item.exam.title }}</div>
+                            <div class="activity-meta">
+                                Marking: +{{ item.exam.correct_marks }} / {{ item.exam.wrong_marks }} |
+                                Avg: {{ item.average_percentage }}% |
+                                Top Score: {{ item.top_score }}
+                            </div>
+                            <div class="teacher-progress">
+                                <span style="width: {{ item.average_percentage }}%;"></span>
+                            </div>
+                        </div>
+                        <div class="teacher-exam-pills">
+                            <span class="quick-chip"><i class="bi bi-people"></i> {{ item.attempts }}</span>
+                            <span class="quick-chip"><i class="bi bi-hourglass"></i> {{ item.pending_reviews }}</span>
+                            <span class="quick-chip"><i class="bi bi-check2-circle"></i> {{ item.pass_count }}</span>
                         </div>
                     </div>
-                    <div class="activity-actions">
-                        <span class="quick-chip">Attempts: {{ item.attempts }}</span>
-                        <span class="quick-chip">Pending: {{ item.pending_reviews }}</span>
-                        <span class="quick-chip">Passes: {{ item.pass_count }}</span>
+                    {% empty %}
+                    <div class="teacher-empty-state">
+                        <i class="bi bi-clipboard-data"></i>
+                        <p>No exam analytics available yet.</p>
+                        <a href="{% url 'create_exam' %}" class="btn btn-primary btn-sm">Create your first exam</a>
                     </div>
+                    {% endfor %}
                 </div>
-                {% empty %}
-                <p class="text-muted mb-0">No exam analytics available yet.</p>
-                {% endfor %}
             </div>
         </div>
     </div>

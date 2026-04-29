@@ -64,6 +64,102 @@ def send_notification_email(subject, message, recipients):
     )
 
 
+def build_teacher_ai_assistant(exam_analytics, pending_reviews, average_percentage, students_attempted, total_exams):
+    focus_points = []
+    action_items = []
+
+    if not total_exams:
+        return {
+            'status': 'Ready to Assist',
+            'summary': 'Create your first exam to unlock teaching insights and performance recommendations.',
+            'risk_label': 'No data yet',
+            'focus_points': [
+                'No exams have been created yet.',
+                'Add questions with clear marking rules to start collecting analytics.',
+            ],
+            'action_items': [
+                'Create an exam',
+                'Add MCQ or written questions',
+                'Publish the schedule for students',
+            ],
+        }
+
+    if not students_attempted:
+        return {
+            'status': 'Awaiting Attempts',
+            'summary': 'Your exams are ready, but student attempt data is not available yet.',
+            'risk_label': 'Waiting for data',
+            'focus_points': [
+                f'{total_exams} exam is available for students.',
+                'Analytics will improve once students submit attempts.',
+            ],
+            'action_items': [
+                'Check that exam schedules are active',
+                'Confirm exams are published',
+                'Share the exam window with students',
+            ],
+        }
+
+    weakest_exam = None
+    busiest_exam = None
+    weak_question = None
+
+    for item in exam_analytics:
+        if item['attempts'] and (weakest_exam is None or item['average_percentage'] < weakest_exam['average_percentage']):
+            weakest_exam = item
+        if item['attempts'] and (busiest_exam is None or item['attempts'] > busiest_exam['attempts']):
+            busiest_exam = item
+        for question in item.get('question_performance', []):
+            if question['attempts'] and (weak_question is None or question['accuracy'] < weak_question['accuracy']):
+                weak_question = question
+
+    if average_percentage >= 75:
+        status = 'Class Performing Well'
+        risk_label = 'Low risk'
+        summary = 'Most finalized attempts are strong. Keep monitoring weak questions and pending reviews.'
+    elif average_percentage >= 50:
+        status = 'Needs Light Support'
+        risk_label = 'Medium risk'
+        summary = 'Class performance is moderate. A short revision or clarification session can improve results.'
+    else:
+        status = 'Intervention Suggested'
+        risk_label = 'High risk'
+        summary = 'Average performance is low. Review question difficulty and provide guided revision.'
+
+    if weakest_exam:
+        focus_points.append(f'Lowest average exam: {weakest_exam["exam"].title} at {weakest_exam["average_percentage"]}%.')
+        action_items.append(f'Review performance for {weakest_exam["exam"].title}')
+    else:
+        focus_points.append('No finalized exam averages are available yet.')
+
+    if busiest_exam:
+        focus_points.append(f'Most attempted exam: {busiest_exam["exam"].title} with {busiest_exam["attempts"]} attempts.')
+
+    if weak_question:
+        question_text = weak_question['question_text']
+        if len(question_text) > 90:
+            question_text = f'{question_text[:87]}...'
+        focus_points.append(f'Weakest question accuracy: {weak_question["accuracy"]}% - {question_text}')
+        action_items.append('Clarify or revise the weakest question')
+
+    if pending_reviews:
+        focus_points.append(f'{pending_reviews} written answer review is pending.')
+        action_items.append('Complete pending written-answer reviews')
+
+    action_items.extend([
+        'Export reports for offline analysis',
+        'Compare pass count with average percentage',
+    ])
+
+    return {
+        'status': status,
+        'summary': summary,
+        'risk_label': risk_label,
+        'focus_points': focus_points[:4],
+        'action_items': action_items[:5],
+    }
+
+
 def build_teacher_analytics(user):
     exams = Exam.objects.filter(created_by=user)
     total_exams = exams.count()
@@ -111,6 +207,14 @@ def build_teacher_analytics(user):
             ],
         })
 
+    teacher_ai_assistant = build_teacher_ai_assistant(
+        exam_analytics=exam_analytics,
+        pending_reviews=pending_reviews,
+        average_percentage=round(average_percentage, 2),
+        students_attempted=students_attempted,
+        total_exams=total_exams,
+    )
+
     return {
         'total_exams': total_exams,
         'total_questions': total_questions,
@@ -120,11 +224,91 @@ def build_teacher_analytics(user):
         'topper': topper,
         'pending_reviews': pending_reviews,
         'exam_analytics': exam_analytics,
+        'teacher_ai_assistant': teacher_ai_assistant,
+    }
+
+
+def build_student_ai_coach(finalized_results, pending_reviews, avg_percentage, improvement, active_exam_count, upcoming_exam_count):
+    recent_results = list(finalized_results.order_by('-submitted_at')[:3])
+    focus_points = []
+    action_items = []
+
+    if not recent_results:
+        return {
+            'status': 'Getting Started',
+            'summary': 'AI Study Coach will become smarter after your first submitted exam.',
+            'risk_label': 'No data yet',
+            'focus_points': [
+                'Attempt an available exam to unlock personalized performance guidance.',
+                'Read exam instructions carefully before starting.',
+            ],
+            'action_items': [
+                'Browse available exams',
+                'Check schedule and attempt limits',
+            ],
+        }
+
+    latest_result = recent_results[0]
+    weakest_result = min(recent_results, key=lambda result: result.percentage)
+
+    if pending_reviews:
+        focus_points.append(f'{pending_reviews} result is waiting for teacher review.')
+
+    if improvement > 0:
+        focus_points.append(f'Your recent trend is improving by {improvement}%.')
+    elif improvement < 0:
+        focus_points.append(f'Your recent trend dropped by {abs(improvement)}%.')
+    else:
+        focus_points.append('Your recent trend is stable.')
+
+    focus_points.append(f'Lowest recent exam: {weakest_result.exam.title} at {weakest_result.percentage}%.')
+
+    if avg_percentage >= 75:
+        status = 'Strong Momentum'
+        risk_label = 'Low risk'
+        summary = 'You are performing well. Keep practicing consistently and protect your accuracy.'
+        action_items.extend([
+            'Review only the questions you missed',
+            'Attempt the next live exam when ready',
+        ])
+    elif avg_percentage >= 50:
+        status = 'Almost There'
+        risk_label = 'Medium risk'
+        summary = 'You are close to a strong average. A focused review before the next exam should help.'
+        action_items.extend([
+            f'Revise {weakest_result.exam.title}',
+            'Practice speed and accuracy before the next attempt',
+        ])
+    else:
+        status = 'Needs Focus'
+        risk_label = 'High risk'
+        summary = 'Focus on building accuracy first. Review mistakes before attempting another exam.'
+        action_items.extend([
+            f'Restudy {weakest_result.exam.title}',
+            'Spend extra time on wrong answers and concepts',
+        ])
+
+    if active_exam_count:
+        action_items.append('Prioritize live exams with attempts left')
+    elif upcoming_exam_count:
+        action_items.append('Prepare for the next scheduled exam')
+    else:
+        action_items.append('Use result history for revision until a new exam is published')
+
+    return {
+        'status': status,
+        'summary': summary,
+        'risk_label': risk_label,
+        'focus_points': focus_points,
+        'action_items': action_items,
+        'latest_exam': latest_result.exam.title,
+        'latest_percentage': round(latest_result.percentage, 2),
     }
 
 
 def build_student_analytics(user):
-    exams = list(Exam.objects.all())
+    now = timezone.now()
+    exams = list(Exam.objects.all().order_by('start_time', 'title'))
     results = Result.objects.filter(student=user).select_related('exam').order_by('-submitted_at')
     finalized_results = results.filter(review_pending=False)
     avg_score = finalized_results.aggregate(avg=Avg('score'))['avg'] or 0
@@ -136,10 +320,48 @@ def build_student_analytics(user):
     latest_percentage = ordered_results[-1].percentage if ordered_results else 0
     improvement = round(latest_percentage - first_percentage, 2) if ordered_results else 0
 
+    active_exam_count = 0
+    upcoming_exam_count = 0
+    recommended_exam = None
+
     for exam in exams:
         used_attempts = results.filter(exam=exam).count()
         exam.used_attempts = used_attempts
         exam.remaining_attempts = None if exam.max_attempts == 0 else max(exam.max_attempts - used_attempts, 0)
+        has_attempts_left = exam.has_unlimited_attempts or exam.remaining_attempts > 0
+
+        if exam.is_active and has_attempts_left:
+            active_exam_count += 1
+            if recommended_exam is None:
+                recommended_exam = exam
+        elif (
+            exam.is_published
+            and exam.start_time
+            and exam.start_time > now
+            and has_attempts_left
+        ):
+            upcoming_exam_count += 1
+            if recommended_exam is None:
+                recommended_exam = exam
+
+    completion_rate = round((pass_count / finalized_results.count()) * 100, 2) if finalized_results.exists() else 0
+    readiness_message = "Start with any available exam to build your performance history."
+    if finalized_results.exists():
+        if avg_percentage >= 75:
+            readiness_message = "You are performing strongly. Keep the streak steady in your next exam."
+        elif avg_percentage >= 50:
+            readiness_message = "You are close to a strong average. Review recent mistakes before the next exam."
+        else:
+            readiness_message = "Focus on accuracy first. Review results, then attempt the next available exam."
+
+    ai_coach = build_student_ai_coach(
+        finalized_results=finalized_results,
+        pending_reviews=pending_reviews,
+        avg_percentage=avg_percentage,
+        improvement=improvement,
+        active_exam_count=active_exam_count,
+        upcoming_exam_count=upcoming_exam_count,
+    )
 
     return {
         'total_exams': len(exams),
@@ -155,6 +377,12 @@ def build_student_analytics(user):
         'improvement': improvement,
         'first_percentage': round(first_percentage, 2),
         'latest_percentage': round(latest_percentage, 2),
+        'active_exam_count': active_exam_count,
+        'upcoming_exam_count': upcoming_exam_count,
+        'recommended_exam': recommended_exam,
+        'completion_rate': completion_rate,
+        'readiness_message': readiness_message,
+        'ai_coach': ai_coach,
     }
 
 
