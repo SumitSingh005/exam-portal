@@ -64,7 +64,10 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-n4#v!s=ei4hw$b0shkv
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env_bool('DJANGO_DEBUG', True)
 
-ALLOWED_HOSTS = [host.strip() for host in os.getenv('DJANGO_ALLOWED_HOSTS', '').split(',') if host.strip()]
+ALLOWED_HOSTS = [host.strip().strip('"').strip("'") for host in os.getenv('DJANGO_ALLOWED_HOSTS', '').split(',') if host.strip()]
+RENDER_EXTERNAL_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME', '').strip()
+if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 if DEBUG and not ALLOWED_HOSTS:
     #ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
     #ALLOWED_HOSTS = ['*']
@@ -72,6 +75,12 @@ if DEBUG and not ALLOWED_HOSTS:
     '127.0.0.1',
     'localhost',
     'exam-portal-lenz.onrender.com'
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    f'https://{host}'
+    for host in ALLOWED_HOSTS
+    if host and host != '*'
 ]
 
 
