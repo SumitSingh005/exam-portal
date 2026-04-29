@@ -22,6 +22,25 @@ except ImportError:
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def load_local_env_file():
+    env_path = BASE_DIR / '.env'
+    if not env_path.exists():
+        return
+
+    for line in env_path.read_text(encoding='utf-8').splitlines():
+        line = line.strip()
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+
+        key, value = line.split('=', 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        os.environ.setdefault(key, value)
+
+
+load_local_env_file()
+
+
 def default_sqlite_path():
     if os.name == 'nt':
         local_appdata = os.getenv('LOCALAPPDATA')
@@ -183,13 +202,20 @@ LOGIN_URL = '/accounts/login/'
 
 LOGOUT_REDIRECT_URL = '/'
 
-EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_USE_TLS = env_bool('EMAIL_USE_TLS', True)
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER or 'noreply@examportal.local')
+DEFAULT_EMAIL_BACKEND = (
+    'django.core.mail.backends.smtp.EmailBackend'
+    if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD
+    else 'django.core.mail.backends.console.EmailBackend'
+)
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', DEFAULT_EMAIL_BACKEND)
+PASSWORD_RESET_DOMAIN = os.getenv('PASSWORD_RESET_DOMAIN', '').strip()
+PASSWORD_RESET_USE_HTTPS = env_bool('PASSWORD_RESET_USE_HTTPS', not DEBUG)
 
 SESSION_COOKIE_SECURE = env_bool('DJANGO_SESSION_COOKIE_SECURE', not DEBUG)
 CSRF_COOKIE_SECURE = env_bool('DJANGO_CSRF_COOKIE_SECURE', not DEBUG)

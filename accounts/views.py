@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import PasswordResetView
 from django.contrib.auth.password_validation import validate_password
 from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
@@ -19,6 +20,25 @@ User = get_user_model()
 # ========================
 MAX_LOGIN_ATTEMPTS = 5
 LOCKOUT_DURATION_MINUTES = 15
+
+
+class PortalPasswordResetView(PasswordResetView):
+    def form_valid(self, form):
+        opts = {
+            'use_https': settings.PASSWORD_RESET_USE_HTTPS or self.request.is_secure(),
+            'token_generator': self.token_generator,
+            'from_email': self.from_email,
+            'email_template_name': self.email_template_name,
+            'subject_template_name': self.subject_template_name,
+            'request': self.request,
+            'html_email_template_name': self.html_email_template_name,
+            'extra_email_context': self.extra_email_context,
+        }
+        if settings.PASSWORD_RESET_DOMAIN:
+            opts['domain_override'] = settings.PASSWORD_RESET_DOMAIN
+
+        form.save(**opts)
+        return super(PasswordResetView, self).form_valid(form)
 
 
 def log_security_event(event_type, user=None, ip_address=None, details=""):
