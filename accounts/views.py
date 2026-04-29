@@ -78,14 +78,17 @@ def send_notification_email(subject, message, recipients):
     if not clean_recipients:
         return
 
-    send_mail(
-        subject,
-        message,
-        None,
-        clean_recipients,
-        fail_silently=True,
-        timeout=settings.EMAIL_TIMEOUT_SECONDS,
-    )
+    try:
+        send_mail(
+            subject,
+            message,
+            None,
+            clean_recipients,
+            fail_silently=True,
+            timeout=settings.EMAIL_TIMEOUT_SECONDS,
+        )
+    except Exception:
+        return
 
 
 def build_teacher_ai_assistant(exam_analytics, pending_reviews, average_percentage, students_attempted, total_exams):

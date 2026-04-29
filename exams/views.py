@@ -4,7 +4,7 @@ import csv
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail, send_mass_mail
+from django.core.mail import get_connection, send_mail, send_mass_mail
 from django.db.models import Avg, Count, Max, Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -55,14 +55,17 @@ def send_notification_email(subject, message, recipients):
     if not clean_recipients:
         return
 
-    send_mail(
-        subject,
-        message,
-        None,
-        clean_recipients,
-        fail_silently=True,
-        timeout=settings.EMAIL_TIMEOUT_SECONDS,
-    )
+    try:
+        send_mail(
+            subject,
+            message,
+            None,
+            clean_recipients,
+            fail_silently=True,
+            timeout=settings.EMAIL_TIMEOUT_SECONDS,
+        )
+    except Exception:
+        return
 
 
 def parse_exam_datetime(value):
@@ -307,7 +310,14 @@ def create_exam(request):
             # Use send_mass_mail to be more efficient than multiple send_mail calls
             # even though it is still synchronous, it is optimized in Django
             mail_tuple = (subject, message, None, recipient_emails)
-            send_mass_mail((mail_tuple,), fail_silently=True)
+            try:
+                connection = get_connection(
+                    fail_silently=True,
+                    timeout=settings.EMAIL_TIMEOUT_SECONDS,
+                )
+                send_mass_mail((mail_tuple,), fail_silently=True, connection=connection)
+            except Exception:
+                pass
 
         messages.success(request, "Exam created successfully.")
         return redirect('dashboard')
