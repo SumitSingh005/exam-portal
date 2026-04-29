@@ -738,23 +738,22 @@ def take_exam(request, exam_id):
 
             request.session['answers'] = answers
             request.session['marked_question_ids'] = marked_question_ids
-            request.session['q_index'] = q_index + 1
-        else:
-            if not selected or not str(selected).strip():
+            next_index = q_index + 1
+            if next_index >= len(question_ids):
+                request.session['q_index'] = q_index
                 if is_ajax:
-                    return JsonResponse({'status': 'error', 'message': 'Select an option.'}, status=400)
-                return render(request, 'exams/take_exam.html', {
-                    'exam': exam,
-                    'question': current_q,
-                    'question_options': question_options,
-                    'q_index': q_index + 1,
-                    'total': len(question_ids),
-                    'error': "Select an option.",
-                    'anti_cheating': anti_cheating,
-                    'current_saved_answer': current_saved_answer,
-                })
+                    payload = build_exam_question_payload(q_index)
+                    if payload is not None:
+                        return JsonResponse(payload)
+                    return JsonResponse({'status': 'complete', 'redirect_url': request.path})
+                return redirect('take_exam', exam_id=exam.id)
+            request.session['q_index'] = next_index
+        else:
+            if selected and str(selected).strip():
+                answers[str(current_q.id)] = selected
+            else:
+                answers.pop(str(current_q.id), None)
 
-            answers[str(current_q.id)] = selected
             if str(current_q.id) in marked_question_ids:
                 marked_question_ids.remove(str(current_q.id))
 

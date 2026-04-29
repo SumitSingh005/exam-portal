@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Exam Portal Logo</title>
+  <desc id="desc">A shield with a graduation cap and check mark for the online examination system.</desc>
+  <defs>
+    <linearGradient id="logoGradient" x1="18" y1="12" x2="78" y2="84" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#136f63"/>
+      <stop offset="1" stop-color="#c26d3a"/>
+    </linearGradient>
+  </defs>
+  <rect width="96" height="96" rx="24" fill="#fffdf8"/>
+  <path d="M48 10 78 22v21c0 20.7-12.3 35.6-30 43-17.7-7.4-30-22.3-30-43V22l30-12Z" fill="url(#logoGradient)"/>
+  <path d="M25 36.5 48 25l23 11.5L48 48 25 36.5Z" fill="#ffffff"/>
+  <path d="M34 44.6v11.2c0 4.4 6.3 7.7 14 7.7s14-3.3 14-7.7V44.6L48 51.8l-14-7.2Z" fill="#eef8f5"/>
+  <path d="M68 39.2v15.5" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M38.5 67.5 45 74l14-16" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

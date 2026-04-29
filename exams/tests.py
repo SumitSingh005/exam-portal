@@ -186,6 +186,66 @@ class ExamWorkflowTests(TestCase):
         self.assertEqual(answer.awarded_marks, -1.0)
         self.assertTrue(answer.reviewed)
 
+    def test_take_exam_allows_skipping_question_without_negative_marks(self):
+        exam = self.create_active_exam(correct_marks=4.0, wrong_marks=-1.0)
+        question = Question.objects.create(
+            exam=exam,
+            question_type='mcq',
+            question_text='2 + 2 = ?',
+            option1='3',
+            option2='4',
+            option3='5',
+            option4='6',
+            correct_option=2,
+        )
+
+        self.client.login(username='student_flow', password='testpass123')
+        self.start_exam_session(exam)
+
+        self.client.get(reverse('take_exam', args=[exam.id]))
+        response = self.client.post(reverse('take_exam', args=[exam.id]), {'action': 'submit_exam'}, follow=True)
+
+        result = Result.objects.get(student=self.student, exam=exam)
+        answer = ResultAnswer.objects.get(result=result, question=question)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(result.score, 0)
+        self.assertEqual(result.percentage, 0)
+        self.assertFalse(result.passed)
+        self.assertIsNone(answer.selected_option)
+        self.assertEqual(answer.awarded_marks, 0)
+        self.assertTrue(answer.reviewed)
+
+    def test_mark_review_on_last_question_does_not_submit_exam(self):
+        exam = self.create_active_exam()
+        question = Question.objects.create(
+            exam=exam,
+            question_type='mcq',
+            question_text='Last question?',
+            option1='A',
+            option2='B',
+            option3='C',
+            option4='D',
+            correct_option=1,
+        )
+
+        self.client.login(username='student_flow', password='testpass123')
+        self.start_exam_session(exam)
+        self.client.get(reverse('take_exam', args=[exam.id]))
+
+        response = self.client.post(
+            reverse('take_exam', args=[exam.id]),
+            {'answer': '1', 'action': 'mark_review'},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['status'], 'success')
+        self.assertTrue(response.json()['question']['marked_for_review'])
+        self.assertFalse(Result.objects.filter(student=self.student, exam=exam).exists())
+        self.assertEqual(self.client.session['q_index'], 0)
+        self.assertIn(str(question.id), self.client.session['marked_question_ids'])
+
     def test_written_submission_stays_pending_until_manual_review(self):
         exam = self.create_active_exam(correct_marks=5.0, pass_percentage=50.0)
         question = Question.objects.create(

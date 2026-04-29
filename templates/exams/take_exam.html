@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 
-<div class="container-fluid">
+<div class="container-fluid exam-attempt-page">
     <div class="fullscreen-gate" id="fullscreenGate">
         <div class="fullscreen-gate-panel">
             <h3>Enter Fullscreen</h3>
@@ -11,23 +12,32 @@
         </div>
     </div>
 
-    <div class="dashboard-hero">
+    <div class="dashboard-hero exam-attempt-hero">
         <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
             <div>
-                <div class="quick-chip mb-3"><i class="bi bi-shield-exclamation"></i> Monitored Exam</div>
+                <div class="quick-chip mb-3"><span class="chip-dot"></span> Monitored Exam</div>
                 <h2>{{ exam.title }}</h2>
                 <p class="panel-subtitle">Question <span id="questionNumber">{{ q_index }}</span> / <span id="questionTotal">{{ total }}</span> | Stay on this page and remain in fullscreen mode during the attempt.</p>
             </div>
             <div class="dashboard-actions">
-                <span class="quick-chip text-danger">Time Left: <span id="timer"></span></span>
+                <span class="exam-timer-pill">Time Left <strong id="timer"></strong></span>
                 <button class="btn btn-outline-dark btn-sm" id="fullscreenBtn" type="button">Enter Fullscreen</button>
+            </div>
+        </div>
+        <div class="exam-progress-shell">
+            <div class="exam-progress-meta">
+                <span>Progress</span>
+                <span><span id="answeredCountHero">{{ answered_count|default:0 }}</span> answered</span>
+            </div>
+            <div class="exam-progress-track">
+                <span id="examProgressFill" style="width: {% widthratio q_index total 100 %}%;"></span>
             </div>
         </div>
     </div>
 
     <div class="row g-4">
         <div class="col-xl-8">
-            <div class="card p-4 shadow">
+            <div class="card p-4 shadow exam-question-card">
     <div class="alert alert-danger {% if not error %}d-none{% endif %}" id="answerError">{{ error }}</div>
 
     <form method="post" id="examForm">
@@ -39,35 +49,43 @@
         <input type="hidden" name="auto_submitted" id="autoSubmitted" value="0">
         <input type="hidden" name="anti_cheating_notes" id="antiCheatingNotes" value="{{ anti_cheating.notes|default:'' }}">
 
-        <p><strong id="questionText">{{ question.question_text }}</strong></p>
+        <div class="exam-question-topline">
+            <span class="question-index-badge">Q<span id="questionNumberBadge">{{ q_index }}</span></span>
+            <div>
+                <span class="exam-question-type">{{ question.get_question_type_display }}</span>
+                <h3 id="questionText">{{ question.question_text }}</h3>
+            </div>
+        </div>
+
         <div class="d-flex gap-2 flex-wrap mb-3">
             <span class="quick-chip">Answered: <span id="answeredCount">{{ answered_count|default:0 }}</span></span>
             <span class="quick-chip">Marked: <span id="markedCount">{{ marked_count|default:0 }}</span></span>
             <span class="quick-chip {% if not is_marked_for_review %}d-none{% endif %}" id="markedBadge">Marked for review</span>
         </div>
 
-        <div id="answerFields">
+        <div id="answerFields" class="exam-answer-fields">
             {% if question.question_type == 'written' %}
-            <textarea class="form-control" name="written_answer" id="writtenAnswerField" rows="5" placeholder="Write your answer here" required>{{ current_saved_answer }}</textarea>
+            <textarea class="form-control exam-written-answer" name="written_answer" id="writtenAnswerField" rows="5" placeholder="Write your answer here" required>{{ current_saved_answer }}</textarea>
             {% else %}
                 {% for option in question_options %}
-                <div class="form-check">
+                <div class="form-check exam-option">
                     <input class="form-check-input" type="radio" name="answer" value="{{ option.value }}" id="{{ option.id }}" {% if current_saved_answer|stringformat:"s" == option.value|stringformat:"s" %}checked{% endif %}>
-                    <label class="form-check-label" for="{{ option.id }}">{{ option.label }}</label>
+                    <label class="form-check-label" for="{{ option.id }}">
+                        <span class="option-marker">{{ forloop.counter }}</span>
+                        <span>{{ option.label }}</span>
+                    </label>
                 </div>
                 {% endfor %}
             {% endif %}
         </div>
 
-        <br>
-
-        <div class="d-flex gap-2 flex-wrap">
+        <div class="exam-action-bar">
             <button class="btn btn-outline-dark {% if q_index <= 1 %}d-none{% endif %}" type="submit" name="action" value="previous" id="previousBtn" formnovalidate>Previous</button>
             <button class="btn btn-outline-warning" type="submit" name="action" value="mark_review" id="markReviewBtn" formnovalidate>Mark for Review</button>
             {% if q_index < total %}
             <button class="btn btn-primary" type="submit" name="action" value="save_next" id="nextSubmitBtn">Save & Next</button>
             {% else %}
-            <button class="btn btn-success" type="submit" id="finalSubmitBtn">Submit Exam</button>
+            <button class="btn btn-success" type="submit" name="action" value="submit_exam" id="finalSubmitBtn">Submit Exam</button>
             {% endif %}
             <button class="btn btn-outline-secondary" type="button" id="clearResponseBtn">Clear Response</button>
         </div>
@@ -76,33 +94,40 @@
         </div>
 
         <div class="col-xl-4">
-            <div class="card p-4 shadow h-100">
-                <h5 class="panel-title">Anti-Cheating Monitor</h5>
-                <p class="panel-subtitle mb-3">Too many violations will submit the exam automatically.</p>
+            <div class="card p-4 shadow h-100 exam-monitor-card">
+                <div class="exam-monitor-header">
+                    <div class="monitor-shield">
+                        <img src="{% static 'images/exam-logo.svg' %}" alt="">
+                    </div>
+                    <div>
+                        <h5 class="panel-title">Anti-Cheating Monitor</h5>
+                        <p class="panel-subtitle mb-0">Too many violations will submit the exam automatically.</p>
+                    </div>
+                </div>
 
-                <div class="activity-list mb-3">
-                    <div class="activity-item">
+                <div class="exam-violation-grid mb-3">
+                    <div class="exam-violation-tile">
                         <div>
                             <div class="activity-title">Tab Switches</div>
                             <div class="activity-meta">Leaving the exam tab is tracked.</div>
                         </div>
                         <div class="activity-title" id="tabSwitchDisplay">{{ anti_cheating.tab_switch_count|default:0 }}</div>
                     </div>
-                    <div class="activity-item">
+                    <div class="exam-violation-tile">
                         <div>
                             <div class="activity-title">Fullscreen Exits</div>
                             <div class="activity-meta">Exiting fullscreen counts as a violation.</div>
                         </div>
                         <div class="activity-title" id="fullscreenExitDisplay">{{ anti_cheating.fullscreen_exit_count|default:0 }}</div>
                     </div>
-                    <div class="activity-item">
+                    <div class="exam-violation-tile">
                         <div>
                             <div class="activity-title">Copy/Paste Attempts</div>
                             <div class="activity-meta">Copy, cut, paste, and right click are blocked.</div>
                         </div>
                         <div class="activity-title" id="copyPasteDisplay">{{ anti_cheating.copy_paste_count|default:0 }}</div>
                     </div>
-                    <div class="activity-item">
+                    <div class="exam-violation-tile">
                         <div>
                             <div class="activity-title">Webcam Status</div>
                             <div class="activity-meta">Camera permission is not required for this exam.</div>
@@ -120,10 +145,234 @@
 </div>
 
 <style>
-.form-check-input:checked + .form-check-label {
-    background-color: rgba(19, 111, 99, 0.15);
-    padding: 8px 10px;
-    border-radius: 12px;
+.exam-attempt-page {
+    max-width: 1600px;
+}
+
+.exam-attempt-hero {
+    border-radius: 26px;
+}
+
+.chip-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #16a34a;
+    box-shadow: 0 0 0 5px rgba(22, 163, 74, 0.14);
+}
+
+.exam-timer-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.75rem 1rem;
+    border-radius: 999px;
+    background: var(--danger-soft);
+    color: #be123c;
+    border: 1px solid rgba(190, 18, 60, 0.16);
+    font-weight: 900;
+}
+
+.exam-progress-shell {
+    margin-top: 1.5rem;
+}
+
+.exam-progress-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.55rem;
+    color: var(--text-soft);
+    font-weight: 800;
+}
+
+.exam-progress-track {
+    height: 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.exam-progress-track span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--accent), var(--secondary));
+    transition: width 0.25s ease;
+}
+
+.exam-question-card {
+    min-height: 360px;
+}
+
+.exam-question-topline {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.question-index-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 58px;
+    height: 58px;
+    border-radius: 18px;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 900;
+    box-shadow: 0 12px 24px rgba(19, 111, 99, 0.2);
+}
+
+.exam-question-type {
+    display: inline-block;
+    margin-bottom: 0.45rem;
+    color: var(--text-soft);
+    font-size: 0.82rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.exam-question-topline h3 {
+    margin: 0;
+    font-size: clamp(1.2rem, 2vw, 1.55rem);
+    line-height: 1.4;
+}
+
+.exam-answer-fields {
+    display: grid;
+    gap: 0.85rem;
+    margin-top: 1rem;
+}
+
+.exam-option {
+    padding: 0;
+}
+
+.exam-option .form-check-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.exam-option .form-check-label {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    width: 100%;
+    min-height: 56px;
+    padding: 0.9rem 1rem;
+    border-radius: 18px;
+    background: var(--surface-strong);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    font-weight: 700;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease, background 0.18s ease;
+}
+
+.exam-option .form-check-label:hover {
+    transform: translateY(-1px);
+    border-color: rgba(19, 111, 99, 0.34);
+    box-shadow: var(--shadow-soft);
+}
+
+.exam-option .form-check-input:checked + .form-check-label {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    box-shadow: 0 12px 24px rgba(19, 111, 99, 0.12);
+}
+
+.option-marker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    border-radius: 999px;
+    background: var(--surface-muted);
+    color: var(--text-soft);
+    font-weight: 900;
+}
+
+.exam-option .form-check-input:checked + .form-check-label .option-marker {
+    background: var(--accent);
+    color: #fff;
+}
+
+.exam-written-answer {
+    min-height: 220px;
+}
+
+.exam-action-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-top: 1.25rem;
+    margin-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+.exam-monitor-header {
+    display: flex;
+    gap: 0.9rem;
+    align-items: center;
+    margin-bottom: 1.2rem;
+}
+
+.monitor-shield {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
+    border-radius: 18px;
+    background: var(--surface-muted);
+}
+
+.monitor-shield img {
+    width: 38px;
+    height: 38px;
+}
+
+.exam-violation-grid {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.exam-violation-tile {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 20px;
+    background: var(--surface-strong);
+    border: 1px solid var(--border);
+}
+
+.exam-violation-tile > .activity-title {
+    min-width: 34px;
+    text-align: center;
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    background: var(--surface-muted);
+}
+
+@media (max-width: 767.98px) {
+    .exam-question-topline,
+    .exam-violation-tile {
+        grid-template-columns: 1fr;
+    }
+
+    .exam-action-bar .btn {
+        width: 100%;
+    }
 }
 
 .fullscreen-gate {
@@ -174,11 +423,14 @@ const fullscreenGate = document.getElementById("fullscreenGate");
 const fullscreenGateBtn = document.getElementById("fullscreenGateBtn");
 const questionNumber = document.getElementById("questionNumber");
 const questionTotal = document.getElementById("questionTotal");
+const questionNumberBadge = document.getElementById("questionNumberBadge");
 const questionText = document.getElementById("questionText");
 const answeredCount = document.getElementById("answeredCount");
+const answeredCountHero = document.getElementById("answeredCountHero");
 const markedCount = document.getElementById("markedCount");
 const markedBadge = document.getElementById("markedBadge");
 const answerFields = document.getElementById("answerFields");
+const examProgressFill = document.getElementById("examProgressFill");
 const answerError = document.getElementById("answerError");
 const violationBanner = document.getElementById("violationBanner");
 const tabSwitchInput = document.getElementById("tabSwitchCount");
@@ -201,6 +453,7 @@ const maxViolations = 5;
 const maxTabSwitches = 3;
 let autoSubmitted = false;
 let hasEnteredFullscreen = Boolean(document.fullscreenElement) || sessionStorage.getItem(fullscreenStartedKey) === "1";
+let examIsFinishing = false;
 
 if (!localStorage.getItem(timerKey)) {
     localStorage.setItem(timerKey, totalTime);
@@ -307,6 +560,7 @@ function autoSubmitExam(message) {
         return;
     }
     autoSubmitted = true;
+    examIsFinishing = true;
     autoSubmittedInput.value = "1";
     if (message) {
         alert(message);
@@ -408,7 +662,7 @@ function renderAnswerFields(question) {
 
     question.options.forEach((option) => {
         const wrapper = document.createElement("div");
-        wrapper.className = "form-check";
+        wrapper.className = "form-check exam-option";
 
         const input = document.createElement("input");
         input.className = "form-check-input";
@@ -423,7 +677,16 @@ function renderAnswerFields(question) {
         const label = document.createElement("label");
         label.className = "form-check-label";
         label.htmlFor = option.id;
-        label.textContent = option.label;
+
+        const marker = document.createElement("span");
+        marker.className = "option-marker";
+        marker.textContent = String(answerFields.children.length + 1);
+
+        const labelText = document.createElement("span");
+        labelText.textContent = option.label;
+
+        label.appendChild(marker);
+        label.appendChild(labelText);
 
         wrapper.appendChild(input);
         wrapper.appendChild(label);
@@ -437,8 +700,17 @@ function renderAnswerFields(question) {
 function renderQuestion(data) {
     questionNumber.textContent = data.q_index;
     questionTotal.textContent = data.total;
+    if (questionNumberBadge) {
+        questionNumberBadge.textContent = data.q_index;
+    }
     questionText.textContent = data.question.text;
     answeredCount.textContent = data.answered_count || 0;
+    if (answeredCountHero) {
+        answeredCountHero.textContent = data.answered_count || 0;
+    }
+    if (examProgressFill) {
+        examProgressFill.style.width = Math.max(0, Math.min(100, (data.q_index / data.total) * 100)) + "%";
+    }
     markedCount.textContent = data.marked_count || 0;
     markedBadge.classList.toggle("d-none", !data.question.marked_for_review);
     renderAnswerFields(data.question);
@@ -454,6 +726,8 @@ function renderQuestion(data) {
             const submitBtn = document.createElement("button");
             submitBtn.className = "btn btn-success";
             submitBtn.type = "submit";
+            submitBtn.name = "action";
+            submitBtn.value = "submit_exam";
             submitBtn.id = "finalSubmitBtn";
             submitBtn.textContent = "Submit Exam";
             nextSubmitBtn.replaceWith(submitBtn);
@@ -485,12 +759,18 @@ function renderQuestion(data) {
 }
 
 document.addEventListener("visibilitychange", function() {
+    if (examIsFinishing) {
+        return;
+    }
     if (document.hidden) {
         registerViolation(tabSwitchInput, "Tab switching detected!", "Tab switch detected");
     }
 });
 
 document.addEventListener("fullscreenchange", function() {
+    if (examIsFinishing) {
+        return;
+    }
     if (!document.fullscreenElement) {
         if (hasEnteredFullscreen) {
             registerViolation(fullscreenExitInput, "Fullscreen exit detected!", "Fullscreen exited");
@@ -603,6 +883,7 @@ form.addEventListener("submit", async function(e) {
             e.preventDefault();
             return;
         }
+        examIsFinishing = true;
         sessionStorage.removeItem(fullscreenStartedKey);
     }
 

@@ -1,0 +1,394 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R 7 0 R 9 0 R] /Count 3 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Length 3176 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+/F1 20 Tf
+(ONLINE EXAMINATION SYSTEM) Tj
+0 -22 Td
+/F1 15 Tf
+(Project Features Document) Tj
+0 -16 Td
+/F1 10 Tf
+(Generated from the current Django project source code.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(Project Overview) Tj
+0 -14 Td
+/F1 10 Tf
+(- The Online Examination System is a Django-based web application for managing digital) Tj
+0 -14 Td
+/F1 10 Tf
+(  examinations in an educational institution.) Tj
+0 -14 Td
+/F1 10 Tf
+(- The system supports three main roles: Administrator, Teacher, and Student.) Tj
+0 -14 Td
+/F1 10 Tf
+(- It covers the complete exam workflow from registration and exam creation to attempt) Tj
+0 -14 Td
+/F1 10 Tf
+(  tracking, result calculation, review, analytics, and reporting.) Tj
+0 -12 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(User And Authentication Features) Tj
+0 -14 Td
+/F1 10 Tf
+(- Separate student and teacher registration flows.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Student ID support for student accounts.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Role-based dashboards for administrators, teachers, and students.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Login using username, email, or student ID depending on the account.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Password validation, password reset pages, and email-based reset workflow.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Failed login attempt tracking with temporary account lockout.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Manual account activation status support for administrative control.) Tj
+0 -12 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(Teacher Features) Tj
+0 -14 Td
+/F1 10 Tf
+(- Create exams with title, duration, schedule, pass percentage, marking rules, instructions,) Tj
+0 -14 Td
+/F1 10 Tf
+(  and attempt limits.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Publish or unpublish exams.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Edit and delete exams created by the teacher.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Add, edit, manage, and delete exam questions.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Support both MCQ questions and written/descriptive questions.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Configure correct marks and negative marks for each exam.) Tj
+0 -14 Td
+/F1 10 Tf
+(- View teacher dashboard analytics including attempts, average score, pending reviews, and) Tj
+0 -14 Td
+/F1 10 Tf
+(  weak questions.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Review written answers manually, award marks, provide feedback, and recalculate final) Tj
+0 -14 Td
+/F1 10 Tf
+(  results.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Export exam results in CSV and Excel-friendly formats.) Tj
+0 -12 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(Student Features) Tj
+0 -14 Td
+/F1 10 Tf
+(- View available exams based on published status and active schedule.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Read exam instructions before starting an attempt.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Attempt exams only within the configured start and end time.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Attempt limit handling with support for fixed limits and unlimited attempts.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Answer MCQ and written questions in the same exam.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Navigate between questions during the exam.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Mark questions for review before final submission.) Tj
+0 -14 Td
+/F1 10 Tf
+(- View instant results for objective exams.) Tj
+/F1 8 Tf
+0 -24 Td
+(Page 1 of 3) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 3232 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+/F1 10 Tf
+(- See pending review status when written answers require teacher evaluation.) Tj
+0 -14 Td
+/F1 10 Tf
+(- View result history, profile analytics, performance trend, and average score.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Access exam leaderboards for finalized results.) Tj
+0 -12 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(Exam Delivery Features) Tj
+0 -14 Td
+/F1 10 Tf
+(- Randomized question order for each exam attempt.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Randomized MCQ option order to reduce answer sharing.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Real-time timer and automatic submission support.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Exam availability validation for unpublished, not-started, expired, and empty exams.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Session-based answer tracking during exam navigation.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Clear result status labels such as Pass, Fail, and Pending Review.) Tj
+0 -12 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(Anti-Cheating And Monitoring Features) Tj
+0 -14 Td
+/F1 10 Tf
+(- Fullscreen entry gate before starting the exam.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Fullscreen exit detection and violation counting.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Tab switch detection and violation counting.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Copy, cut, paste, and right-click blocking during exam attempts.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Webcam permission warning count support.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Real-time anti-cheating state recording through AJAX.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Auto-submit behavior when violation thresholds are reached.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Violation counts and anti-cheating notes saved with the result.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Teacher reports display tab switch, fullscreen, copy-paste, webcam, and auto-submit) Tj
+0 -14 Td
+/F1 10 Tf
+(  information.) Tj
+0 -12 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(Result And Analytics Features) Tj
+0 -14 Td
+/F1 10 Tf
+(- Automatic score calculation for MCQ answers.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Negative marking support for wrong answers.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Percentage calculation and pass/fail evaluation using exam pass percentage.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Pending review workflow for written answers.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Question-wise performance analysis with attempts, correct count, and accuracy.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Leaderboard showing top finalized scores.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Teacher reports with highest score, lowest score, average score, attempted count, and weak) Tj
+0 -14 Td
+/F1 10 Tf
+(  questions.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Student analytics with attempted exams, pending reviews, average percentage, and recent) Tj
+0 -14 Td
+/F1 10 Tf
+(  results.) Tj
+0 -12 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(Admin Features) Tj
+0 -14 Td
+/F1 10 Tf
+(- Custom Django admin management dashboard.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Admin summary for students, teachers, exams, published exams, results, and pending reviews.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Portal settings for site name, support email, certificate title, and default pass) Tj
+0 -14 Td
+/F1 10 Tf
+(  percentage.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Manage users with role labels for Admin, Teacher, and Student.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Inline question and result management from the exam admin page.) Tj
+/F1 8 Tf
+0 -24 Td
+(Page 2 of 3) Tj
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Length 1688 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+/F1 10 Tf
+(- Bulk publish and unpublish exams.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Bulk mark selected results or answers as reviewed with automatic recalculation.) Tj
+0 -12 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(Notification And Deployment Features) Tj
+0 -14 Td
+/F1 10 Tf
+(- Email notification helper support for registration, exam creation, and result publishing) Tj
+0 -14 Td
+/F1 10 Tf
+(  workflows.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Console email fallback when SMTP environment variables are not configured.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Environment-driven database and deployment settings.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Whitenoise support for static file serving.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Gunicorn, PostgreSQL adapter, and Render-friendly deployment files included.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Custom command for repeatable superuser creation in deployment environments.) Tj
+0 -12 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(Technology Stack) Tj
+0 -14 Td
+/F1 10 Tf
+(- Backend: Python and Django 5.2.12.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Frontend: HTML, CSS, JavaScript, Bootstrap-style templates, and Chart.js-ready analytics.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Database: SQLite for local development with PostgreSQL deployment support.) Tj
+0 -14 Td
+/F1 10 Tf
+(- Static files: Django staticfiles and Whitenoise.) Tj
+0 -12 Td
+/F1 10 Tf
+() Tj
+0 -20 Td
+/F1 14 Tf
+(Conclusion) Tj
+0 -14 Td
+/F1 10 Tf
+(The project provides a complete online examination platform with role-based access, secure) Tj
+0 -14 Td
+/F1 10 Tf
+(exam delivery, automated evaluation, manual review for written answers, analytics,) Tj
+0 -14 Td
+/F1 10 Tf
+(leaderboards, exports, and administrative controls.) Tj
+/F1 8 Tf
+0 -24 Td
+(Page 3 of 3) Tj
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 8 0 R >>
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000133 00000 n 
+0000000203 00000 n 
+0000003431 00000 n 
+0000003557 00000 n 
+0000006841 00000 n 
+0000006967 00000 n 
+0000008707 00000 n 
+trailer
+<< /Size 10 /Root 1 0 R >>
+startxref
+8833
+%%EOF
