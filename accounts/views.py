@@ -71,6 +71,9 @@ def get_client_ip(request):
 
 
 def send_notification_email(subject, message, recipients):
+    if not settings.SEND_NOTIFICATION_EMAILS:
+        return
+
     clean_recipients = [email for email in recipients if email]
     if not clean_recipients:
         return
@@ -81,6 +84,7 @@ def send_notification_email(subject, message, recipients):
         None,
         clean_recipients,
         fail_silently=True,
+        timeout=settings.EMAIL_TIMEOUT_SECONDS,
     )
 
 

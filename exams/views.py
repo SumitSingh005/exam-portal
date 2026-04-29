@@ -1,6 +1,7 @@
 import random
 import csv
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail, send_mass_mail
@@ -47,6 +48,9 @@ def clear_exam_session(request):
 
 
 def send_notification_email(subject, message, recipients):
+    if not settings.SEND_NOTIFICATION_EMAILS:
+        return
+
     clean_recipients = [email for email in recipients if email]
     if not clean_recipients:
         return
@@ -57,6 +61,7 @@ def send_notification_email(subject, message, recipients):
         None,
         clean_recipients,
         fail_silently=True,
+        timeout=settings.EMAIL_TIMEOUT_SECONDS,
     )
 
 
@@ -291,7 +296,7 @@ def create_exam(request):
         
         recipient_emails = list(dict.fromkeys([request.user.email, *student_emails]))
 
-        if recipient_emails:
+        if settings.SEND_NOTIFICATION_EMAILS and recipient_emails:
             subject = f"New Exam Created: {title}"
             message = (
                 f"A new exam '{title}' has been created.\n"
