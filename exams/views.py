@@ -14,6 +14,7 @@ from django.views.decorators.http import require_POST
 
 from accounts.decorators import student_required, teacher_required
 
+from .ai_checker import evaluate_answer
 from .models import Exam, PortalSettings, Question, Result, ResultAnswer
 
 
@@ -56,13 +57,17 @@ def send_notification_email(subject, message, recipients):
         return
 
     try:
+        connection = get_connection(
+            fail_silently=True,
+            timeout=settings.EMAIL_TIMEOUT_SECONDS,
+        )
         send_mail(
             subject,
             message,
             None,
             clean_recipients,
             fail_silently=True,
-            timeout=settings.EMAIL_TIMEOUT_SECONDS,
+            connection=connection,
         )
     except Exception:
         return
@@ -881,6 +886,19 @@ def review_result(request, result_id):
     if not written_answers:
         messages.info(request, "This result has no written answers to review.")
         return redirect('teacher_exam_report', exam_id=result.exam.id)
+
+    for answer in written_answers:
+        answer.ai_suggestion = evaluate_answer(
+            answer.written_answer,
+            answer.question.written_answer,
+            max_marks=result.exam.correct_marks,
+        )
+        answer.review_marks_value = answer.awarded_marks
+        answer.review_feedback_value = answer.feedback
+        if not answer.reviewed and answer.awarded_marks == 0:
+            answer.review_marks_value = answer.ai_suggestion['marks']
+        if not answer.reviewed and not answer.feedback:
+            answer.review_feedback_value = answer.ai_suggestion['feedback']
 
     if request.method == 'POST':
         for answer in written_answers:

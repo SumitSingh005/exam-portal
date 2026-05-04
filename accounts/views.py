@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.auth.password_validation import validate_password
-from django.core.mail import send_mail
+from django.core.mail import get_connection, send_mail
 from django.core.exceptions import ValidationError
 from django.db.models import Avg, Count, Max, Q
 from django.shortcuts import redirect, render
@@ -79,13 +79,17 @@ def send_notification_email(subject, message, recipients):
         return
 
     try:
+        connection = get_connection(
+            fail_silently=True,
+            timeout=settings.EMAIL_TIMEOUT_SECONDS,
+        )
         send_mail(
             subject,
             message,
             None,
             clean_recipients,
             fail_silently=True,
-            timeout=settings.EMAIL_TIMEOUT_SECONDS,
+            connection=connection,
         )
     except Exception:
         return

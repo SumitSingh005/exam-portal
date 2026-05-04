@@ -2,8 +2,8 @@
 
 {% block content %}
 
-<div class="container-fluid">
-    <div class="dashboard-hero">
+<div class="container-fluid question-builder-page">
+    <div class="dashboard-hero question-builder-hero">
         <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
             <div>
                 <div class="quick-chip mb-3"><i class="bi bi-patch-plus-fill"></i> Question Builder</div>
@@ -11,7 +11,7 @@
                 <p class="panel-subtitle">Choose an exam, add MCQ or written questions, and keep track of your latest additions.</p>
             </div>
             <div class="dashboard-actions">
-                <a href="{% url 'teacher_exam_list' %}" class="btn btn-outline-dark">My Exams</a>
+                <a href="{% url 'teacher_exam_list' %}" class="btn btn-outline-dark"><i class="bi bi-kanban"></i> My Exams</a>
             </div>
         </div>
     </div>
@@ -28,7 +28,7 @@
 
     <div class="row g-4">
         <div class="col-xl-7">
-            <div class="card p-4 h-100">
+            <div class="card p-4 h-100 question-builder-card">
                 {% if not selected_exam %}
                 <div class="form-section mb-0">
                     <div class="form-section-title">Select Exam</div>
@@ -41,7 +41,7 @@
                                 <option value="{{ exam.id }}">{{ exam.title }}</option>
                             {% endfor %}
                         </select>
-                        <button type="submit" name="select_exam" class="btn btn-primary">Continue</button>
+                        <button type="submit" name="select_exam" class="btn btn-primary"><i class="bi bi-arrow-right-circle"></i> Continue</button>
                     </form>
                 </div>
                 {% endif %}
@@ -54,20 +54,23 @@
                     <form method="post" action="{% url 'add_question' %}" id="questionForm">
                         {% csrf_token %}
 
-                        <div class="mb-3">
-                            <label class="form-label">Question Type</label>
-                            <select name="question_type" id="questionType" class="form-select">
-                                <option value="mcq">MCQ Question</option>
-                                <option value="written">Written Question</option>
-                            </select>
+                        <div class="question-type-grid mb-3">
+                            <label class="question-type-option">
+                                <input type="radio" name="question_type" value="mcq" checked>
+                                <span><i class="bi bi-ui-checks-grid"></i> MCQ Question</span>
+                            </label>
+                            <label class="question-type-option">
+                                <input type="radio" name="question_type" value="written">
+                                <span><i class="bi bi-journal-text"></i> Written Question</span>
+                            </label>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Question</label>
-                            <textarea name="question" class="form-control" placeholder="Enter question" required></textarea>
+                            <textarea name="question" class="form-control question-textarea" placeholder="Enter question" required></textarea>
                         </div>
 
-                        <div id="mcqFields">
+                        <div id="mcqFields" class="question-field-panel">
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">Option 1</label>
@@ -98,14 +101,15 @@
                             </div>
                         </div>
 
-                        <div id="writtenFields" class="d-none mt-3">
+                        <div id="writtenFields" class="question-field-panel d-none">
                             <label class="form-label">Expected Written Answer</label>
-                            <textarea name="written_answer" class="form-control" placeholder="Expected written answer"></textarea>
+                            <textarea name="written_answer" class="form-control question-reference-textarea" placeholder="Expected written answer"></textarea>
+                            <div class="form-text mt-2">This reference answer is used for teacher review and AI suggestions.</div>
                         </div>
 
                         <div class="d-flex gap-2 mt-4 flex-wrap">
-                            <button type="submit" name="action" value="add" class="btn btn-success">Add Question</button>
-                            <button type="submit" name="action" value="finish" class="btn btn-primary" formnovalidate>Finish</button>
+                            <button type="submit" name="action" value="add" class="btn btn-success"><i class="bi bi-plus-circle"></i> Add Question</button>
+                            <button type="submit" name="action" value="finish" class="btn btn-primary" formnovalidate><i class="bi bi-check2-circle"></i> Finish</button>
                         </div>
                         <div id="questionFormStatus" class="small text-muted mt-3" aria-live="polite"></div>
                     </form>
@@ -115,24 +119,39 @@
         </div>
 
         <div class="col-xl-5">
-            <div class="card p-4 h-100">
-                <h5 class="panel-title">Recent Questions</h5>
-                <p class="panel-subtitle mb-3">Keep an eye on what you just added.</p>
+            <div class="card p-4 h-100 recent-question-card">
+                <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                    <div>
+                        <h5 class="panel-title">Recent Questions</h5>
+                        <p class="panel-subtitle mb-0">Keep an eye on what you just added.</p>
+                    </div>
+                    {% if selected_exam %}
+                    <span class="quick-chip">{{ questions|length }}</span>
+                    {% endif %}
+                </div>
                 {% if selected_exam %}
-                <div class="activity-list" id="recentQuestionsList">
+                <div class="activity-list recent-question-list" id="recentQuestionsList">
                     {% for q in questions|slice:":5" %}
-                    <div class="activity-item">
-                        <div>
+                    <div class="activity-item recent-question-item">
+                        <div class="recent-question-copy">
                             <div class="activity-title">{{ q.question_text }}</div>
-                            <div class="activity-meta">{{ q.get_question_type_display }}</div>
+                            <div class="activity-meta">
+                                <span class="question-type-badge">{{ q.get_question_type_display }}</span>
+                            </div>
                         </div>
                     </div>
                     {% empty %}
-                    <p class="text-muted mb-0">No questions added yet.</p>
+                    <div class="teacher-empty-state compact-empty-state">
+                        <i class="bi bi-patch-question"></i>
+                        <p>No questions added yet.</p>
+                    </div>
                     {% endfor %}
                 </div>
                 {% else %}
-                <p class="text-muted mb-0">Select an exam first to start building your question set.</p>
+                <div class="teacher-empty-state compact-empty-state">
+                    <i class="bi bi-journal-plus"></i>
+                    <p>Select an exam first to start building your question set.</p>
+                </div>
                 {% endif %}
             </div>
         </div>
@@ -142,7 +161,7 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const form = document.getElementById("questionForm");
-    const questionType = document.getElementById("questionType");
+    const questionTypeInputs = document.querySelectorAll('input[name="question_type"]');
     const mcqFields = document.getElementById("mcqFields");
     const writtenFields = document.getElementById("writtenFields");
     const questionAlert = document.getElementById("questionAlert");
@@ -175,16 +194,21 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         const item = document.createElement("div");
-        item.className = "activity-item";
+        item.className = "activity-item recent-question-item";
 
         const content = document.createElement("div");
+        content.className = "recent-question-copy";
+
         const title = document.createElement("div");
         title.className = "activity-title";
         title.textContent = question.text;
 
         const meta = document.createElement("div");
         meta.className = "activity-meta";
-        meta.textContent = question.type;
+        const badge = document.createElement("span");
+        badge.className = "question-type-badge";
+        badge.textContent = question.type;
+        meta.appendChild(badge);
 
         content.appendChild(title);
         content.appendChild(meta);
@@ -197,11 +221,12 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function toggleQuestionFields() {
-        if (!questionType) {
+        const selectedType = document.querySelector('input[name="question_type"]:checked');
+        if (!selectedType) {
             return;
         }
 
-        const isWritten = questionType.value === "written";
+        const isWritten = selectedType.value === "written";
         mcqFields.classList.toggle("d-none", isWritten);
         writtenFields.classList.toggle("d-none", !isWritten);
     }
@@ -267,8 +292,8 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    if (questionType) {
-        questionType.addEventListener("change", toggleQuestionFields);
+    if (questionTypeInputs.length) {
+        questionTypeInputs.forEach((input) => input.addEventListener("change", toggleQuestionFields));
         toggleQuestionFields();
     }
 });

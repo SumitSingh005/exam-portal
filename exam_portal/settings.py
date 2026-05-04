@@ -58,24 +58,28 @@ def env_bool(name, default=False):
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-n4#v!s=ei4hw$b0shkvb%rf8h^d+pn+yp!38o*znp(4kiaomsr')
+# SECURITY WARNING: keep the secret key used in production secret.
+SECRET_KEY = os.getenv(
+    'DJANGO_SECRET_KEY',
+    'exam-portal-local-fallback-key-2026-change-this-in-production-8c42f91b7a65',
+)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env_bool('DJANGO_DEBUG', True)
+# SECURITY WARNING: don't run with debug turned on in production.
+IS_DEPLOYMENT = env_bool('DJANGO_PRODUCTION', False) or bool(
+    os.getenv('DATABASE_URL') or os.getenv('RENDER_EXTERNAL_HOSTNAME')
+)
+DEBUG = env_bool('DJANGO_DEBUG', not IS_DEPLOYMENT)
 
 ALLOWED_HOSTS = [host.strip().strip('"').strip("'") for host in os.getenv('DJANGO_ALLOWED_HOSTS', '').split(',') if host.strip()]
 RENDER_EXTERNAL_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME', '').strip()
 if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-if DEBUG and not ALLOWED_HOSTS:
-    #ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
-    #ALLOWED_HOSTS = ['*']
+if not ALLOWED_HOSTS:
     ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
-    'exam-portal-lenz.onrender.com'
-]
+        '127.0.0.1',
+        'localhost',
+        'exam-portal-lenz.onrender.com',
+    ]
 
 CSRF_TRUSTED_ORIGINS = [
     f'https://{host}'
@@ -224,7 +228,7 @@ DEFAULT_EMAIL_BACKEND = (
 )
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', DEFAULT_EMAIL_BACKEND)
 EMAIL_TIMEOUT_SECONDS = int(os.getenv('EMAIL_TIMEOUT_SECONDS', '5'))
-SEND_NOTIFICATION_EMAILS = env_bool('SEND_NOTIFICATION_EMAILS', False)
+SEND_NOTIFICATION_EMAILS = env_bool('SEND_NOTIFICATION_EMAILS', True)
 PASSWORD_RESET_DOMAIN = os.getenv('PASSWORD_RESET_DOMAIN', '').strip()
 PASSWORD_RESET_USE_HTTPS = env_bool('PASSWORD_RESET_USE_HTTPS', not DEBUG)
 
@@ -233,8 +237,8 @@ CSRF_COOKIE_SECURE = env_bool('DJANGO_CSRF_COOKIE_SECURE', not DEBUG)
 SECURE_SSL_REDIRECT = env_bool('DJANGO_SECURE_SSL_REDIRECT', not DEBUG)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_HSTS_SECONDS = int(os.getenv('DJANGO_SECURE_HSTS_SECONDS', '0' if DEBUG else '3600'))
-SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool('DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS', False)
-SECURE_HSTS_PRELOAD = env_bool('DJANGO_SECURE_HSTS_PRELOAD', False)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool('DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS', not DEBUG)
+SECURE_HSTS_PRELOAD = env_bool('DJANGO_SECURE_HSTS_PRELOAD', not DEBUG)
 
 # ========================
 # ENHANCED SECURITY SETTINGS

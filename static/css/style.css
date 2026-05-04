@@ -1573,6 +1573,211 @@ body.theme-dark .teacher-hero-strip span {
     font-weight: 700;
 }
 
+/* Question builder */
+.question-builder-page .card {
+    overflow: hidden;
+}
+
+.question-builder-card .form-section {
+    display: grid;
+}
+
+.question-type-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+}
+
+.question-type-option {
+    min-width: 0;
+    margin: 0;
+    cursor: pointer;
+}
+
+.question-type-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.question-type-option span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 46px;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface-strong);
+    color: var(--text);
+    font-weight: 800;
+    text-align: center;
+}
+
+.question-type-option input:checked + span {
+    border-color: rgba(19, 111, 99, 0.38);
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    box-shadow: inset 0 0 0 1px rgba(19, 111, 99, 0.12);
+}
+
+.question-field-panel {
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--surface);
+}
+
+.question-textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.question-reference-textarea {
+    min-height: 180px;
+    resize: vertical;
+}
+
+.recent-question-card {
+    min-height: 420px;
+}
+
+.recent-question-list {
+    align-content: start;
+}
+
+.recent-question-item {
+    align-items: flex-start;
+}
+
+.recent-question-copy {
+    min-width: 0;
+    width: 100%;
+}
+
+.recent-question-item .activity-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+    line-height: 1.35;
+}
+
+.question-type-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
+    background: var(--surface-muted);
+    border: 1px solid var(--border);
+    color: var(--text-soft);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.compact-empty-state {
+    min-height: 230px;
+    box-shadow: none;
+}
+
+/* Manage questions */
+.manage-questions-page {
+    max-width: 1180px;
+    margin-inline: auto;
+}
+
+.manage-question-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.manage-question-card {
+    position: relative;
+}
+
+.manage-question-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.manage-question-header > div {
+    min-width: 0;
+}
+
+.manage-question-form {
+    display: grid;
+    gap: 1rem;
+}
+
+.manage-question-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.manage-question-delete {
+    position: absolute;
+    right: 1.5rem;
+    bottom: 1.5rem;
+}
+
+.manage-question-card .manage-question-actions {
+    padding-right: 8.5rem;
+}
+
+/* Teacher exam list */
+.teacher-exams-page {
+    max-width: 1180px;
+    margin-inline: auto;
+}
+
+.teacher-exam-card-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.teacher-exam-manage-card {
+    display: grid;
+    gap: 1.2rem;
+}
+
+.teacher-exam-manage-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: start;
+}
+
+.teacher-exam-manage-stats,
+.teacher-exam-manage-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+.teacher-exam-manage-stats {
+    justify-content: flex-end;
+}
+
+.teacher-exam-manage-actions {
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.teacher-exam-delete-form {
+    display: inline-flex;
+}
+
 @media (min-width: 1200px) {
     .col-xl-5 {
         flex: 0 0 auto;
@@ -1704,6 +1909,42 @@ body.theme-dark .teacher-hero-strip span {
     .teacher-metric-grid,
     .teacher-insight-strip {
         grid-template-columns: 1fr;
+    }
+
+    .question-type-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .manage-question-header {
+        display: grid;
+    }
+
+    .manage-question-card .manage-question-actions {
+        padding-right: 0;
+    }
+
+    .manage-question-delete {
+        position: static;
+        margin-top: 0.75rem;
+    }
+
+    .manage-question-actions .btn,
+    .manage-question-delete .btn {
+        width: 100%;
+    }
+
+    .teacher-exam-manage-main {
+        grid-template-columns: 1fr;
+    }
+
+    .teacher-exam-manage-stats {
+        justify-content: flex-start;
+    }
+
+    .teacher-exam-manage-actions .btn,
+    .teacher-exam-delete-form,
+    .teacher-exam-delete-form .btn {
+        width: 100%;
     }
 
     .teacher-hero-strip span,

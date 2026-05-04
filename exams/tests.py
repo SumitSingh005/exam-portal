@@ -323,6 +323,41 @@ class ExamWorkflowTests(TestCase):
         self.assertTrue(answer.is_correct)
         self.assertEqual(answer.feedback, 'Good explanation')
 
+    def test_teacher_review_page_shows_ai_suggestion_for_written_answer(self):
+        exam = self.create_active_exam(correct_marks=5.0, pass_percentage=50.0)
+        question = Question.objects.create(
+            exam=exam,
+            question_type='written',
+            question_text='Explain Python.',
+            written_answer='Python is a programming language.',
+        )
+        result = Result.objects.create(
+            student=self.student,
+            exam=exam,
+            score=0,
+            total_questions=1,
+            percentage=0,
+            passed=False,
+            review_pending=True,
+        )
+        answer = ResultAnswer.objects.create(
+            result=result,
+            question=question,
+            written_answer='Python is a programming language.',
+            awarded_marks=0,
+            reviewed=False,
+            is_correct=False,
+        )
+
+        self.client.login(username='teacher_flow', password='testpass123')
+        response = self.client.get(reverse('review_result', args=[result.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'AI Suggestion')
+        self.assertContains(response, 'Marks: 5.0/5.0')
+        self.assertContains(response, f'name="marks_{answer.id}"')
+        self.assertContains(response, 'Excellent answer')
+
     def test_leaderboard_excludes_pending_review_results(self):
         exam = self.create_active_exam()
         Result.objects.create(

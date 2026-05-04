@@ -2,85 +2,136 @@
 
 {% block content %}
 
-<div class="container mt-4">
-    <div class="card shadow p-4">
-        <h3 class="mb-3">Manage Questions: {{ exam.title }}</h3>
+<div class="container-fluid manage-questions-page">
+    <div class="dashboard-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div>
+                <div class="quick-chip mb-3"><i class="bi bi-patch-question-fill"></i> Question Manager</div>
+                <h2>{{ exam.title }}</h2>
+                <p class="panel-subtitle">Edit MCQ and written questions without squeezing them into a table.</p>
+            </div>
+            <div class="dashboard-actions">
+                <a href="{% url 'add_question' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Add Question</a>
+                <a href="{% url 'teacher_exam_list' %}" class="btn btn-outline-dark"><i class="bi bi-kanban"></i> My Exams</a>
+            </div>
+        </div>
+    </div>
 
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} mb-3">
-                    {{ message }}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} app-card border-0 mb-3">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="manage-question-list">
+        {% for q in questions %}
+        <div class="card p-4 manage-question-card" data-question-card>
+            <div class="manage-question-header">
+                <div>
+                    <div class="quick-chip mb-2">Question {{ forloop.counter }}</div>
+                    <h5 class="panel-title mb-0">{{ q.question_text|truncatechars:110 }}</h5>
                 </div>
-            {% endfor %}
-        {% endif %}
+                <span class="question-type-badge">{{ q.get_question_type_display }}</span>
+            </div>
 
-        <table class="table table-bordered">
-            <tr>
-                <th>#</th>
-                <th>Type</th>
-                <th>Question</th>
-                <th>Option 1</th>
-                <th>Option 2</th>
-                <th>Option 3</th>
-                <th>Option 4</th>
-                <th>Correct</th>
-                <th>Expected Written Answer</th>
-                <th>Action</th>
-            </tr>
+            <form method="post" action="{% url 'edit_question' q.id %}" class="manage-question-form">
+                {% csrf_token %}
 
-            {% for q in questions %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>
-                    <select name="question_type" class="form-control" form="edit-question-{{ q.id }}">
-                        <option value="mcq" {% if q.question_type == 'mcq' %}selected{% endif %}>MCQ</option>
-                        <option value="written" {% if q.question_type == 'written' %}selected{% endif %}>Written</option>
-                    </select>
-                </td>
-                <td>
-                    <input type="text" name="question" value="{{ q.question_text }}" class="form-control" form="edit-question-{{ q.id }}">
-                </td>
-                <td>
-                    <input type="text" name="option1" value="{{ q.option1 }}" class="form-control" form="edit-question-{{ q.id }}">
-                </td>
-                <td>
-                    <input type="text" name="option2" value="{{ q.option2 }}" class="form-control" form="edit-question-{{ q.id }}">
-                </td>
-                <td>
-                    <input type="text" name="option3" value="{{ q.option3 }}" class="form-control" form="edit-question-{{ q.id }}">
-                </td>
-                <td>
-                    <input type="text" name="option4" value="{{ q.option4 }}" class="form-control" form="edit-question-{{ q.id }}">
-                </td>
-                <td>
-                    <select name="correct" class="form-control" form="edit-question-{{ q.id }}">
-                        <option value="1" {% if q.correct_option == 1 %}selected{% endif %}>1</option>
-                        <option value="2" {% if q.correct_option == 2 %}selected{% endif %}>2</option>
-                        <option value="3" {% if q.correct_option == 3 %}selected{% endif %}>3</option>
-                        <option value="4" {% if q.correct_option == 4 %}selected{% endif %}>4</option>
-                    </select>
-                </td>
-                <td>
-                    <textarea name="written_answer" class="form-control" form="edit-question-{{ q.id }}">{{ q.written_answer }}</textarea>
-                </td>
-                <td>
-                    <form method="post" action="{% url 'edit_question' q.id %}" id="edit-question-{{ q.id }}" class="d-inline">
-                        {% csrf_token %}
-                        <button class="btn btn-warning btn-sm" type="submit">Update</button>
-                    </form>
-                    <form method="post" action="{% url 'delete_question' q.id %}" class="d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                    </form>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="10" class="text-muted">No questions found for this exam.</td>
-            </tr>
-            {% endfor %}
-        </table>
+                <div class="question-type-grid mb-3">
+                    <label class="question-type-option">
+                        <input type="radio" name="question_type" value="mcq" {% if q.question_type == 'mcq' %}checked{% endif %}>
+                        <span><i class="bi bi-ui-checks-grid"></i> MCQ Question</span>
+                    </label>
+                    <label class="question-type-option">
+                        <input type="radio" name="question_type" value="written" {% if q.question_type == 'written' %}checked{% endif %}>
+                        <span><i class="bi bi-journal-text"></i> Written Question</span>
+                    </label>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Question</label>
+                    <textarea name="question" class="form-control question-textarea" required>{{ q.question_text }}</textarea>
+                </div>
+
+                <div class="question-field-panel manage-mcq-fields {% if q.question_type == 'written' %}d-none{% endif %}">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Option 1</label>
+                            <input type="text" name="option1" value="{{ q.option1 }}" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Option 2</label>
+                            <input type="text" name="option2" value="{{ q.option2 }}" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Option 3</label>
+                            <input type="text" name="option3" value="{{ q.option3 }}" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Option 4</label>
+                            <input type="text" name="option4" value="{{ q.option4 }}" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <label class="form-label">Correct Option</label>
+                        <select name="correct" class="form-select">
+                            <option value="1" {% if q.correct_option == 1 %}selected{% endif %}>Correct: Option 1</option>
+                            <option value="2" {% if q.correct_option == 2 %}selected{% endif %}>Correct: Option 2</option>
+                            <option value="3" {% if q.correct_option == 3 %}selected{% endif %}>Correct: Option 3</option>
+                            <option value="4" {% if q.correct_option == 4 %}selected{% endif %}>Correct: Option 4</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="question-field-panel manage-written-fields {% if q.question_type == 'mcq' %}d-none{% endif %}">
+                    <label class="form-label">Expected Written Answer</label>
+                    <textarea name="written_answer" class="form-control question-reference-textarea">{{ q.written_answer }}</textarea>
+                    <div class="form-text mt-2">Used as the guide answer for teacher review and AI answer suggestions.</div>
+                </div>
+
+                <div class="manage-question-actions">
+                    <button class="btn btn-warning" type="submit"><i class="bi bi-save"></i> Update</button>
+                </div>
+            </form>
+
+            <form method="post" action="{% url 'delete_question' q.id %}" class="manage-question-delete">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash"></i> Delete</button>
+            </form>
+        </div>
+        {% empty %}
+        <div class="teacher-empty-state">
+            <i class="bi bi-patch-question"></i>
+            <p>No questions found for this exam.</p>
+            <a href="{% url 'add_question' %}" class="btn btn-primary btn-sm">Add Questions</a>
+        </div>
+        {% endfor %}
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll("[data-question-card]").forEach(function(card) {
+        const typeInputs = card.querySelectorAll('input[name="question_type"]');
+        const mcqFields = card.querySelector(".manage-mcq-fields");
+        const writtenFields = card.querySelector(".manage-written-fields");
+
+        function syncFields() {
+            const selected = card.querySelector('input[name="question_type"]:checked');
+            const isWritten = selected && selected.value === "written";
+            mcqFields.classList.toggle("d-none", isWritten);
+            writtenFields.classList.toggle("d-none", !isWritten);
+        }
+
+        typeInputs.forEach(function(input) {
+            input.addEventListener("change", syncFields);
+        });
+        syncFields();
+    });
+});
+</script>
 
 {% endblock %}

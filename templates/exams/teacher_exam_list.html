@@ -2,36 +2,63 @@
 
 {% block content %}
 
-<div class="container mt-4">
-    <h2>My Exams</h2>
+<div class="container-fluid teacher-exams-page">
+    <div class="dashboard-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div>
+                <div class="quick-chip mb-3"><i class="bi bi-kanban-fill"></i> My Exams</div>
+                <h2>Exam Management</h2>
+                <p class="panel-subtitle">Edit exam settings, manage questions, and open reports from one clean workspace.</p>
+            </div>
+            <div class="dashboard-actions">
+                <a href="{% url 'create_exam' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Create Exam</a>
+                <a href="{% url 'add_question' %}" class="btn btn-outline-dark"><i class="bi bi-patch-plus"></i> Add Questions</a>
+            </div>
+        </div>
+    </div>
 
-    <table class="table table-striped mt-3">
-        <tr>
-            <th>Title</th>
-            <th>Duration</th>
-            <th>Actions</th>
-        </tr>
-
+    <div class="teacher-exam-card-list">
         {% for exam in exams %}
-        <tr>
-            <td>{{ exam.title }}</td>
-            <td>{{ exam.duration }} min</td>
-            <td>
-                <a href="{% url 'edit_exam' exam.id %}" class="btn btn-warning btn-sm">Edit</a>
-                <form method="post" action="{% url 'delete_exam' exam.id %}" class="d-inline">
+        <div class="card p-4 teacher-exam-manage-card">
+            <div class="teacher-exam-manage-main">
+                <div>
+                    <div class="quick-chip mb-2">{{ exam.duration }} min</div>
+                    <h5 class="panel-title mb-1">{{ exam.title }}</h5>
+                    <p class="panel-subtitle mb-0">
+                        {{ exam.total_questions }} question{{ exam.total_questions|pluralize }}
+                        | +{{ exam.correct_marks }} / {{ exam.wrong_marks }}
+                    </p>
+                </div>
+                <div class="teacher-exam-manage-stats">
+                    {% if exam.is_published %}
+                    <span class="question-type-badge">Published</span>
+                    {% else %}
+                    <span class="question-type-badge">Unpublished</span>
+                    {% endif %}
+                    <span class="question-type-badge">
+                        {% if exam.has_unlimited_attempts %}Unlimited{% else %}{{ exam.max_attempts }} attempt{{ exam.max_attempts|pluralize }}{% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <div class="teacher-exam-manage-actions">
+                <a href="{% url 'edit_exam' exam.id %}" class="btn btn-warning"><i class="bi bi-pencil-square"></i> Edit</a>
+                <a href="{% url 'manage_questions' exam.id %}" class="btn btn-secondary"><i class="bi bi-patch-question"></i> Questions</a>
+                <a href="{% url 'teacher_exam_report' exam.id %}" class="btn btn-info"><i class="bi bi-bar-chart-line"></i> Report</a>
+                <form method="post" action="{% url 'delete_exam' exam.id %}" class="teacher-exam-delete-form">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash"></i> Delete</button>
                 </form>
-                <a href="{% url 'manage_questions' exam.id %}" class="btn btn-secondary btn-sm">Questions</a>
-                <a href="{% url 'teacher_exam_report' exam.id %}" class="btn btn-info btn-sm">Report</a>
-            </td>
-        </tr>
+            </div>
+        </div>
         {% empty %}
-        <tr>
-            <td colspan="3" class="text-muted">No exams created yet.</td>
-        </tr>
+        <div class="teacher-empty-state">
+            <i class="bi bi-kanban"></i>
+            <p>No exams created yet.</p>
+            <a href="{% url 'create_exam' %}" class="btn btn-primary btn-sm">Create Exam</a>
+        </div>
         {% endfor %}
-    </table>
+    </div>
 </div>
 
 {% endblock %}
