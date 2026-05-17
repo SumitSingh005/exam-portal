@@ -12,7 +12,10 @@ from django.utils import timezone
 
 from exams.models import Exam, Question, Result, ResultAnswer
 
+import logging
+
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 # ========================
@@ -37,7 +40,14 @@ class PortalPasswordResetView(PasswordResetView):
         if settings.PASSWORD_RESET_DOMAIN:
             opts['domain_override'] = settings.PASSWORD_RESET_DOMAIN
 
-        form.save(**opts)
+        try:
+            form.save(**opts)
+        except Exception:
+            logger.exception("Password reset email failed")
+            messages.error(
+                self.request,
+                "We could not send the password reset email right now. Please check the email settings and try again.",
+            )
         return super(PasswordResetView, self).form_valid(form)
 
 

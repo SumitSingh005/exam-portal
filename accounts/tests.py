@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import TestCase
@@ -90,6 +92,19 @@ class StudentDashboardTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'console email backend')
         self.assertContains(response, 'python manage.py runserver')
+
+    @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
+    def test_password_reset_email_failure_does_not_return_server_error(self):
+        with self.assertLogs('accounts.views', level='ERROR'):
+            with patch('django.contrib.auth.forms.PasswordResetForm.save', side_effect=Exception('SMTP failed')):
+                response = self.client.post(
+                    reverse('password_reset'),
+                    {'email': 'student@example.com'},
+                    follow=True,
+                )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'We could not send the password reset email right now.')
 
     def test_student_signup_rejects_duplicate_email(self):
         response = self.client.post(
