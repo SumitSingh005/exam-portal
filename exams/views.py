@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Sumit Singh. All rights reserved.
+# Unauthorized copying or reuse of this project is prohibited.
+
 import random
 import csv
 

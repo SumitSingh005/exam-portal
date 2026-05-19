@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# Copyright (c) 2026 Sumit Singh. All rights reserved.
+# Unauthorized copying or reuse of this project is prohibited.
 """Django's command-line utility for administrative tasks."""
 import os
 import sys

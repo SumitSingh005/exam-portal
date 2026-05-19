@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Sumit Singh. All rights reserved.
+# Unauthorized copying or reuse of this project is prohibited.
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout

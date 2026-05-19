@@ -1054,6 +1054,33 @@ body {
     margin-inline: auto;
 }
 
+.app-footer,
+.public-footer {
+    color: var(--text-soft);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.app-footer {
+    margin-top: 2rem;
+    padding: 1rem 0 0.25rem;
+}
+
+.public-footer {
+    position: fixed;
+    right: 1rem;
+    bottom: 0.75rem;
+    z-index: 5;
+    max-width: min(520px, calc(100vw - 2rem));
+    padding: 0.55rem 0.75rem;
+    color: rgba(255, 255, 255, 0.82);
+    background: rgba(8, 20, 24, 0.58);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+}
+
 .dashboard-hero,
 .card,
 .stat-card,
