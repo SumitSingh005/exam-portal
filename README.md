@@ -1,5 +1,8 @@
 # Exam Portal
 
+> Copyright (c) 2026 Sumit Singh. All rights reserved.
+> Unauthorized copying, modification, redistribution, submission, or reuse of this project is prohibited.
+
 Exam Portal is a Django-based online examination system for students and teachers.  
 Teachers can create exams, add questions, manage schedules, apply negative marking, and view reports.  
 Students can register, attempt exams, view results, check leaderboards, and track performance from their profile page.
@@ -12,10 +15,14 @@ Students can register, attempt exams, view results, check leaderboards, and trac
 - Randomized question order
 - Randomized answer options
 - Negative marking support
+- MCQ and written-answer questions
+- Manual review workflow for written answers
+- Anti-cheating activity tracking
 - Pass/fail analytics
 - Leaderboards
 - Student profile and progress tracking
 - Teacher reports
+- CSV and Excel-friendly result export
 - Email notification support
 
 ## Tech Stack
@@ -30,14 +37,14 @@ Students can register, attempt exams, view results, check leaderboards, and trac
 
 ```text
 exam_portal/
-├── accounts/
-├── exams/
-├── exam_portal/
-├── static/
-├── templates/
-├── manage.py
-├── .env.example
-└── README.md
+|-- accounts/
+|-- exams/
+|-- exam_portal/
+|-- static/
+|-- templates/
+|-- manage.py
+|-- .env.example
+`-- README.md
 ```
 
 ## Setup Steps
@@ -57,13 +64,13 @@ python -m venv .venv
 .venv\Scripts\activate
 ```
 
-### 3. Install Django
+### 3. Install dependencies
 
 ```powershell
-pip install django
+pip install -r requirements.txt
 ```
 
-If you later add more dependencies, install them too.
+This installs Django and the deployment packages used by the project.
 
 ### 4. Run migrations
 
@@ -148,9 +155,10 @@ If you do not set these, the project falls back to Django's console email backen
 - set exam schedule
 - configure pass percentage
 - configure negative marking
-- add and manage questions
+- add and manage MCQ and written questions
 - view reports
 - view analytics
+- export results
 
 ## Main Features Added
 
@@ -258,13 +266,17 @@ python manage.py ensure_superuser
 
 ## Future Improvements
 
-- Export results to CSV
 - Certificate generation
-- Webcam or proctoring support
-- Subjective questions
+- Stronger webcam proctoring
 - SMS or WhatsApp notifications
 - HTML email templates for notifications
 
 ## Author
 
-Built as an online exam management project using Django.
+Built by Sumit Singh as an online exam management project using Django.
+
+## Ownership and Usage
+
+This project is the original academic work of Sumit Singh. It is shared only for
+review, demonstration, or evaluation purposes. Do not copy, modify, distribute,
+submit, or reuse this project without written permission from Sumit Singh.
